@@ -1,10 +1,10 @@
 # Project Status — Message Scheduler
-Última atualização: 2026-02-18 17:30 UTC
-Progresso geral: 12%
+Última atualização: 2026-02-18 21:00 UTC
+Progresso geral: 25%
 
 ## Fases
 - [x] Fase 1 — Infraestrutura Docker + Bootstrap Laravel (100%)
-- [ ] Fase 2 — Autenticação (0%)
+- [x] Fase 2 — Autenticação (100%)
 - [ ] Fase 3 — Providers / Huggy OAuth2 (0%)
 - [ ] Fase 4 — Agendamentos Individuais (0%)
 - [ ] Fase 5 — Agendamentos Bulk (0%)
