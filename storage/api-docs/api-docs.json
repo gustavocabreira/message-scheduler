@@ -1,0 +1,509 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Message Scheduler API",
+        "description": "API for scheduling messages across multiple providers (Huggy, etc.)",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "operationId": "6703d7156c265a1e7b47e500d2a16304",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "timezone": {
+                                        "type": "string",
+                                        "example": "America/Sao_Paulo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login and get a Sanctum token",
+                "operationId": "a5385ffca73f113abef00ea604d1ca58",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "my-phone"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful, returns token"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout and revoke the current token",
+                "operationId": "0f6715df0d22b69c7e35bd32b4c1fc92",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get authenticated user profile",
+                "operationId": "37252cdc2ae05f1e2e4fd541e987489d",
+                "responses": {
+                    "200": {
+                        "description": "User profile"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/huggy/redirect": {
+            "get": {
+                "tags": [
+                    "Auth",
+                    "Providers"
+                ],
+                "summary": "Get Huggy OAuth2 authorization URL",
+                "operationId": "8bd711283e2633d91e64383f91d961ca",
+                "responses": {
+                    "200": {
+                        "description": "Authorization URL to redirect user to"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/huggy/callback": {
+            "get": {
+                "tags": [
+                    "Auth",
+                    "Providers"
+                ],
+                "summary": "Handle Huggy OAuth2 callback and exchange code for tokens",
+                "operationId": "4d380f1adeed86a9ce68f9eb68c3837a",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tokens stored, provider connected"
+                    },
+                    "400": {
+                        "description": "Missing code or token exchange failed"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/providers": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "List all provider connections for the authenticated user",
+                "operationId": "ae4eea74746a75b8f2bdee3d07a49309",
+                "responses": {
+                    "200": {
+                        "description": "List of provider connections"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Create a new provider connection",
+                "operationId": "22a88d5f1b1c596a5c71d037cfb380fb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "provider_type",
+                                    "credentials"
+                                ],
+                                "properties": {
+                                    "provider_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "huggy"
+                                        ],
+                                        "example": "huggy"
+                                    },
+                                    "credentials": {
+                                        "type": "string",
+                                        "example": "{\"access_token\":\"tok_xxx\"}"
+                                    },
+                                    "settings": {
+                                        "type": "object",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Provider connection created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/providers/{id}": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Get a specific provider connection",
+                "operationId": "e91d66082a9aedfadc42505d4d90604e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Provider connection details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Update a provider connection credentials",
+                "operationId": "b7ee00bfea35aa318bc7bb8bf26b226b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "credentials"
+                                ],
+                                "properties": {
+                                    "credentials": {
+                                        "type": "string",
+                                        "example": "{\"access_token\":\"tok_new\"}"
+                                    },
+                                    "settings": {
+                                        "type": "object",
+                                        "example": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Provider updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Delete a provider connection",
+                "operationId": "a82c461c0b4c481245d4b8d080b4dc61",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Provider deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/providers/{id}/test-connection": {
+            "post": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Test if a provider connection is still valid",
+                "operationId": "09b9a1c2c7c5f846c2609af52b7bfd80",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connection test result"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/providers/{id}/contacts": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "List contacts from the provider",
+                "operationId": "42d5f46e57b08c0ceb72b7de99528d45",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of contacts"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Providers",
+            "description": "Providers"
+        }
+    ]
+}
