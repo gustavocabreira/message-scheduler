@@ -1,0 +1,130 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/octane/Dockerfile
+    container_name: message-scheduler-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - message-scheduler
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: message-scheduler-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: message_scheduler
+      POSTGRES_USER: message_scheduler
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U message_scheduler -d message_scheduler"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - message-scheduler
+
+  redis:
+    image: redis:7-alpine
+    container_name: message-scheduler-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - message-scheduler
+
+  horizon:
+    build:
+      context: .
+      dockerfile: docker/octane/Dockerfile
+    container_name: message-scheduler-horizon
+    restart: unless-stopped
+    command: ["php", "/var/www/artisan", "horizon"]
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    environment:
+      - APP_ENV=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - message-scheduler
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/octane/Dockerfile
+    container_name: message-scheduler-scheduler
+    restart: unless-stopped
+    command: ["bash", "-c", "while true; do php /var/www/artisan schedule:run --no-interaction; sleep 60; done"]
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    environment:
+      - APP_ENV=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - message-scheduler
+
+  reverb:
+    build:
+      context: .
+      dockerfile: docker/octane/Dockerfile
+    container_name: message-scheduler-reverb
+    restart: unless-stopped
+    command: ["php", "/var/www/artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    environment:
+      - APP_ENV=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - message-scheduler
+
+networks:
+  message-scheduler:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
