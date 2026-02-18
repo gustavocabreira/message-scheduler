@@ -485,6 +485,260 @@
                     }
                 ]
             }
+        },
+        "/scheduled-messages": {
+            "get": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "List scheduled messages with optional filters",
+                "operationId": "1ab8049f0c39180f02c17e4054157118",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "processing",
+                                "sent",
+                                "failed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "provider_connection_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "contact_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of scheduled messages"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "Create a new scheduled message",
+                "operationId": "3d1e99aefe4069b34976a23e4c4467dc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "provider_connection_id",
+                                    "contact_id",
+                                    "contact_name",
+                                    "message",
+                                    "scheduled_at"
+                                ],
+                                "properties": {
+                                    "provider_connection_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "contact_id": {
+                                        "type": "string",
+                                        "example": "contact-123"
+                                    },
+                                    "contact_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Hello!"
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-03-01T10:00:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Scheduled message created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/scheduled-messages/{id}": {
+            "get": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "Get a specific scheduled message",
+                "operationId": "97677e9eb7c1b79d75d2c233224fdf89",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Scheduled message details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "Update a pending scheduled message",
+                "operationId": "dc72bc4091a73b7cbb199e90ee0b81b7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Cannot update non-pending message"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "Cancel and soft-delete a scheduled message",
+                "operationId": "7cbed32f3f6cd4049ab269e1e8900a10",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message cancelled"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/scheduled-messages/{id}/logs": {
+            "get": {
+                "tags": [
+                    "Scheduled Messages"
+                ],
+                "summary": "Get delivery logs for a scheduled message",
+                "operationId": "c7b8030b30083d88f2710da6860bf010",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Message delivery logs"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -504,6 +758,10 @@
         {
             "name": "Providers",
             "description": "Providers"
+        },
+        {
+            "name": "Scheduled Messages",
+            "description": "Scheduled Messages"
         }
     ]
 }

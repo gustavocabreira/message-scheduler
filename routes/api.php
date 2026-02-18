@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HuggyOAuthController;
 use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\ScheduledMessageController;
 use Illuminate\Support\Facades\Route;
 
 // Auth routes
@@ -29,4 +30,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('providers.test-connection');
     Route::get('providers/{provider}/contacts', [ProviderController::class, 'contacts'])
         ->name('providers.contacts');
+
+    // Scheduled Messages
+    Route::apiResource('scheduled-messages', ScheduledMessageController::class);
+    Route::get('scheduled-messages/{scheduledMessage}/logs', [ScheduledMessageController::class, 'logs'])
+        ->name('scheduled-messages.logs');
 });

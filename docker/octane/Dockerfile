@@ -2,7 +2,7 @@ FROM php:8.4-cli
 
 LABEL maintainer="Message Scheduler"
 
-# Install system dependencies
+# Install system dependencies + Node.js (required for Octane --watch via chokidar)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,6 +16,12 @@ RUN apt-get update && apt-get install -y \
     unzip \
     supervisor \
     && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js LTS (for Octane --watch with chokidar)
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+    && apt-get install -y nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

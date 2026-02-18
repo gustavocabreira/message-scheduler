@@ -44,4 +44,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(ProviderConnection::class);
     }
+
+    /** @return HasMany<ScheduledMessage, $this> */
+    public function scheduledMessages(): HasMany
+    {
+        return $this->hasMany(ScheduledMessage::class);
+    }
 }
