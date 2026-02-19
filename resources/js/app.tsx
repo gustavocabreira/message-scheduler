@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { AppRouter } from '@/router';
 import '../css/app.css';
@@ -27,6 +28,7 @@ createRoot(rootElement).render(
             <ThemeProvider>
                 <TooltipProvider>
                     <AppRouter />
+                    <Toaster richColors position="top-right" />
                 </TooltipProvider>
             </ThemeProvider>
         </QueryClientProvider>

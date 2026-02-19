@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 describe('POST /api/providers/{id}/test-connection', function (): void {
     it('returns connected true when provider responds successfully', function (): void {
         Http::fake([
-            '*/v3/me' => Http::response(['id' => 1, 'name' => 'Test'], 200),
+            '*/v3/agents/profile' => Http::response(['id' => 1, 'name' => 'Test'], 200),
         ]);
 
         $user = User::factory()->create();
@@ -30,7 +30,7 @@ describe('POST /api/providers/{id}/test-connection', function (): void {
 
     it('returns connected false and sets error status when provider fails', function (): void {
         Http::fake([
-            '*/v3/me' => Http::response([], 401),
+            '*/v3/agents/profile' => Http::response([], 401),
         ]);
 
         $user = User::factory()->create();

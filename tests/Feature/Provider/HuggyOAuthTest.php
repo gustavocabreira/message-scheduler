@@ -16,7 +16,7 @@ describe('Huggy OAuth2', function (): void {
             $mockProvider = Mockery::mock();
             $mockProvider->shouldReceive('stateless')->andReturnSelf();
             $mockProvider->shouldReceive('redirect')
-                ->andReturn(new SymfonyRedirect('https://api.huggy.app/oauth/authorize?client_id=test'));
+                ->andReturn(new SymfonyRedirect('https://auth.huggy.app/oauth/authorize?client_id=test'));
 
             Socialite::shouldReceive('driver')->with('huggy')->andReturn($mockProvider);
 

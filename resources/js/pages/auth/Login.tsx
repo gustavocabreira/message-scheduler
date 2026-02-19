@@ -14,8 +14,8 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import api, { initCsrf } from '@/lib/api';
-import { useAuthStore, type AuthUser } from '@/stores/auth.store';
+import api from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 const loginSchema = z.object({
     email: z.string().email('Informe um e-mail válido.'),
@@ -25,12 +25,13 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginResponse {
-    data: AuthUser;
+    message: string;
+    token: string;
 }
 
 export function LoginPage() {
     const navigate = useNavigate();
-    const setUser = useAuthStore((s) => s.setUser);
+    const setToken = useAuthStore((s) => s.setToken);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -39,12 +40,11 @@ export function LoginPage() {
 
     const loginMutation = useMutation({
         mutationFn: async (values: LoginFormValues) => {
-            await initCsrf();
             const response = await api.post<LoginResponse>('/auth/login', values);
             return response.data;
         },
         onSuccess: (data) => {
-            setUser(data.data);
+            setToken(data.token);
             navigate('/dashboard', { replace: true });
         },
         onError: (error: { response?: { data?: { message?: string } } }) => {

@@ -16,6 +16,7 @@ describe('POST /api/auth/register', function (): void {
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'message',
+                'token',
                 'user' => ['id', 'name', 'email', 'timezone', 'created_at'],
             ])
             ->assertJson([
@@ -26,6 +27,7 @@ describe('POST /api/auth/register', function (): void {
                 ],
             ]);
 
+        expect($response->json('token'))->not->toBeNull()->toBeString();
         $this->assertDatabaseHas('users', ['email' => 'test@example.com']);
     });
 

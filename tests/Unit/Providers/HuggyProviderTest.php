@@ -12,7 +12,7 @@ describe('HuggyProvider', function (): void {
     });
 
     it('testConnection returns true when API responds 200', function (): void {
-        Http::fake(['*/v3/me' => Http::response(['id' => 1], 200)]);
+        Http::fake(['*/v3/agents/profile' => Http::response(['id' => 1], 200)]);
 
         $connection = ProviderConnection::factory()->active()->make();
         $provider = new HuggyProvider($connection);
@@ -21,7 +21,7 @@ describe('HuggyProvider', function (): void {
     });
 
     it('testConnection returns false when API responds 401', function (): void {
-        Http::fake(['*/v3/me' => Http::response([], 401)]);
+        Http::fake(['*/v3/agents/profile' => Http::response([], 401)]);
 
         $connection = ProviderConnection::factory()->active()->make();
         $provider = new HuggyProvider($connection);

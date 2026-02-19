@@ -109,7 +109,7 @@ describe('Provider CRUD', function (): void {
     });
 
     describe('DELETE /api/providers/{id}', function (): void {
-        it('soft-deletes a provider connection', function (): void {
+        it('permanently deletes a provider connection', function (): void {
             $user = User::factory()->create();
             $connection = ProviderConnection::factory()->create(['user_id' => $user->id]);
 
@@ -117,7 +117,7 @@ describe('Provider CRUD', function (): void {
                 ->deleteJson("/api/providers/{$connection->id}");
 
             $response->assertStatus(200);
-            $this->assertSoftDeleted('provider_connections', ['id' => $connection->id]);
+            $this->assertDatabaseMissing('provider_connections', ['id' => $connection->id]);
         });
 
         it('returns 403 for another users provider', function (): void {

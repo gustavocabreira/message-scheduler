@@ -56,9 +56,11 @@ class AuthController extends Controller
 
         $data = new RegisterData($name, $email, $password, $timezone);
         $user = $action->execute($data);
+        $token = $user->createToken('api')->plainTextToken;
 
         return response()->json([
             'message' => 'User registered successfully.',
+            'token' => $token,
             'user' => new UserResource($user),
         ], 201);
     }

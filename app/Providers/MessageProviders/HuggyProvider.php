@@ -32,7 +32,7 @@ class HuggyProvider implements MessageProvider
         }
 
         $response = Http::withToken($accessToken)
-            ->get("{$this->apiUrl}/v3/me");
+            ->get("{$this->apiUrl}/v3/agents/profile");
 
         return $response->successful();
     }

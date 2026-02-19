@@ -14,7 +14,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import api, { initCsrf } from '@/lib/api';
+import api from '@/lib/api';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 
 const registerSchema = z
@@ -32,11 +32,14 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface RegisterResponse {
-    data: AuthUser;
+    message: string;
+    token: string;
+    user: AuthUser;
 }
 
 export function RegisterPage() {
     const navigate = useNavigate();
+    const setToken = useAuthStore((s) => s.setToken);
     const setUser = useAuthStore((s) => s.setUser);
 
     const form = useForm<RegisterFormValues>({
@@ -46,12 +49,12 @@ export function RegisterPage() {
 
     const registerMutation = useMutation({
         mutationFn: async (values: RegisterFormValues) => {
-            await initCsrf();
             const response = await api.post<RegisterResponse>('/auth/register', values);
             return response.data;
         },
         onSuccess: (data) => {
-            setUser(data.data);
+            setToken(data.token);
+            setUser(data.user);
             navigate('/dashboard', { replace: true });
         },
         onError: (error: { response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {

@@ -10,26 +10,38 @@ use Laravel\Socialite\Two\User;
 class HuggyDriver extends AbstractProvider
 {
     /** @var string[] */
-    protected $scopes = ['contacts:read', 'messages:write'];
+    protected $scopes = ['install_app', 'read_agent_profile'];
 
     // No native type — overriding parent's untyped property
     protected $scopeSeparator = ' ';
 
+    /**
+     * OAuth2 server base URL (authorization + token endpoints).
+     * Separate from the REST API base URL.
+     */
+    private function authBaseUrl(): string
+    {
+        return 'https://auth.huggy.dev';
+    }
+
+    /**
+     * REST API base URL (user profile, contacts, messages).
+     */
     private function apiUrl(): string
     {
         $url = config('services.huggy.api_url');
 
-        return is_string($url) ? $url : 'https://api.huggy.app';
+        return rtrim(is_string($url) ? $url : 'https://api.huggy.dev', '/');
     }
 
     protected function getAuthUrl(mixed $state): string
     {
-        return $this->buildAuthUrlFromBase("{$this->apiUrl()}/oauth/authorize", (string) $state);
+        return $this->buildAuthUrlFromBase("{$this->authBaseUrl()}/oauth/authorize", (string) $state);
     }
 
     protected function getTokenUrl(): string
     {
-        return "{$this->apiUrl()}/oauth/token";
+        return "{$this->authBaseUrl()}/oauth/access_token";
     }
 
     /**
@@ -37,7 +49,7 @@ class HuggyDriver extends AbstractProvider
      */
     protected function getUserByToken(mixed $token): array
     {
-        $response = $this->getHttpClient()->get("{$this->apiUrl()}/v3/me", [
+        $response = $this->getHttpClient()->get("{$this->apiUrl()}/v3/agents/profile", [
             'headers' => ['Authorization' => 'Bearer '.(string) $token],
         ]);
 

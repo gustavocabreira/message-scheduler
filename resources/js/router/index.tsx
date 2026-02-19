@@ -5,6 +5,8 @@ import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/pages/auth/Login';
 import { RegisterPage } from '@/pages/auth/Register';
 import { DashboardPage } from '@/pages/dashboard/Dashboard';
+import { ProvidersPage } from '@/pages/providers/ProvidersPage';
+import { HuggyCallbackPage } from '@/pages/providers/HuggyCallbackPage';
 import type { ReactNode } from 'react';
 
 function PrivateRoute({ children }: { children: ReactNode }) {
@@ -42,7 +44,8 @@ export function AppRouter() {
                     }
                 >
                     <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/providers" element={<DashboardPage />} />
+                    <Route path="/providers" element={<ProvidersPage />} />
+                    <Route path="/providers/huggy/callback" element={<HuggyCallbackPage />} />
                     <Route path="/scheduled-messages" element={<DashboardPage />} />
                 </Route>
 

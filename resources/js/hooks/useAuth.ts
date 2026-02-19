@@ -4,7 +4,7 @@ import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 import { useEffect } from 'react';
 
 interface MeResponse {
-    data: AuthUser;
+    user: AuthUser;
 }
 
 export function useAuth() {
@@ -13,13 +13,14 @@ export function useAuth() {
     const { data, isLoading, error } = useQuery<MeResponse>({
         queryKey: ['auth', 'me'],
         queryFn: () => api.get<MeResponse>('/auth/me').then((r) => r.data),
+        enabled: isAuthenticated,
         retry: false,
         staleTime: 5 * 60 * 1000,
     });
 
     useEffect(() => {
-        if (data?.data) {
-            setUser(data.data);
+        if (data?.user) {
+            setUser(data.user);
         } else if (error) {
             logout();
         }

@@ -7,8 +7,14 @@ import { useThemeStore } from '@/stores/theme.store';
 
 jest.mock('@/lib/api', () => ({
     __esModule: true,
-    default: { post: jest.fn(), get: jest.fn() },
-    initCsrf: jest.fn().mockResolvedValue(undefined),
+    default: {
+        post: jest.fn(),
+        get: jest.fn(),
+        interceptors: {
+            request: { use: jest.fn() },
+            response: { use: jest.fn() },
+        },
+    },
 }));
 
 // Override BrowserRouter history to allow controlling initial URL
@@ -42,7 +48,7 @@ function renderRouter(path = '/login') {
 const mockUser = { id: 1, name: 'Ada Lovelace', email: 'ada@example.com' };
 
 beforeEach(() => {
-    useAuthStore.setState({ user: null, isAuthenticated: false });
+    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
     useThemeStore.setState({ theme: 'system' });
     mockNavigate.mockClear();
 });
@@ -73,7 +79,7 @@ describe('AppRouter — unauthenticated user', () => {
 
 describe('AppRouter — authenticated user', () => {
     beforeEach(() => {
-        useAuthStore.setState({ user: mockUser, isAuthenticated: true });
+        useAuthStore.setState({ user: mockUser, token: 'test-token', isAuthenticated: true });
     });
 
     it('renders the Dashboard page at /dashboard', () => {

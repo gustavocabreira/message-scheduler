@@ -9,8 +9,14 @@ import { useThemeStore } from '@/stores/theme.store';
 
 jest.mock('@/lib/api', () => ({
     __esModule: true,
-    default: { post: jest.fn(), get: jest.fn() },
-    initCsrf: jest.fn().mockResolvedValue(undefined),
+    default: {
+        post: jest.fn(),
+        get: jest.fn(),
+        interceptors: {
+            request: { use: jest.fn() },
+            response: { use: jest.fn() },
+        },
+    },
 }));
 
 const mockUser = { id: 1, name: 'Ada Lovelace', email: 'ada@example.com' };
@@ -36,7 +42,7 @@ function renderAppLayout(initialEntry = '/dashboard') {
 }
 
 beforeEach(() => {
-    useAuthStore.setState({ user: mockUser, isAuthenticated: true });
+    useAuthStore.setState({ user: mockUser, token: 'test-token', isAuthenticated: true });
     useThemeStore.setState({ theme: 'system' });
     document.documentElement.classList.remove('light', 'dark');
 });

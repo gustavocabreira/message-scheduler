@@ -97,6 +97,19 @@ services:
     networks:
       - message-scheduler
 
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: message-scheduler-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+    networks:
+      - message-scheduler
+
   reverb:
     build:
       context: .

@@ -4,26 +4,27 @@ import { LoginPage } from '@/pages/auth/Login';
 import { useAuthStore } from '@/stores/auth.store';
 import { renderWithProviders } from '../../helpers/renderWithProviders';
 
-// Mock the API module
 jest.mock('@/lib/api', () => ({
     __esModule: true,
     default: {
         post: jest.fn(),
         get: jest.fn(),
+        interceptors: {
+            request: { use: jest.fn() },
+            response: { use: jest.fn() },
+        },
     },
-    initCsrf: jest.fn().mockResolvedValue(undefined),
 }));
 
-import api, { initCsrf } from '@/lib/api';
+import api from '@/lib/api';
 
 const mockedApi = api as jest.Mocked<typeof api>;
-const mockedInitCsrf = initCsrf as jest.Mock;
 
-const mockUser = { id: 1, name: 'Ada Lovelace', email: 'ada@example.com' };
+const mockToken = 'test-sanctum-token-abc123';
 
 beforeEach(() => {
     jest.clearAllMocks();
-    useAuthStore.setState({ user: null, isAuthenticated: false });
+    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
 });
 
 describe('LoginPage — rendering', () => {
@@ -87,8 +88,8 @@ describe('LoginPage — form validation', () => {
 });
 
 describe('LoginPage — successful login', () => {
-    it('calls initCsrf and POST /auth/login with correct payload', async () => {
-        mockedApi.post.mockResolvedValueOnce({ data: { data: mockUser } });
+    it('calls POST /auth/login with correct payload', async () => {
+        mockedApi.post.mockResolvedValueOnce({ data: { message: 'Login successful.', token: mockToken } });
         const user = userEvent.setup();
         renderWithProviders(<LoginPage />);
 
@@ -97,7 +98,6 @@ describe('LoginPage — successful login', () => {
         await user.click(screen.getByRole('button', { name: /^entrar$/i }));
 
         await waitFor(() => {
-            expect(mockedInitCsrf).toHaveBeenCalledTimes(1);
             expect(mockedApi.post).toHaveBeenCalledWith('/auth/login', {
                 email: 'ada@example.com',
                 password: 'secret123',
@@ -105,8 +105,8 @@ describe('LoginPage — successful login', () => {
         });
     });
 
-    it('stores the user in the auth store after successful login', async () => {
-        mockedApi.post.mockResolvedValueOnce({ data: { data: mockUser } });
+    it('stores the token in the auth store and marks as authenticated after successful login', async () => {
+        mockedApi.post.mockResolvedValueOnce({ data: { message: 'Login successful.', token: mockToken } });
         const user = userEvent.setup();
         renderWithProviders(<LoginPage />);
 
@@ -115,7 +115,7 @@ describe('LoginPage — successful login', () => {
         await user.click(screen.getByRole('button', { name: /^entrar$/i }));
 
         await waitFor(() => {
-            expect(useAuthStore.getState().user).toEqual(mockUser);
+            expect(useAuthStore.getState().token).toBe(mockToken);
             expect(useAuthStore.getState().isAuthenticated).toBe(true);
         });
     });
@@ -164,6 +164,7 @@ describe('LoginPage — failed login', () => {
         await user.click(screen.getByRole('button', { name: /^entrar$/i }));
 
         await waitFor(() => {
+            expect(useAuthStore.getState().token).toBeNull();
             expect(useAuthStore.getState().isAuthenticated).toBe(false);
         });
     });

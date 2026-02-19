@@ -9,15 +9,18 @@ jest.mock('@/lib/api', () => ({
     default: {
         post: jest.fn(),
         get: jest.fn(),
+        interceptors: {
+            request: { use: jest.fn() },
+            response: { use: jest.fn() },
+        },
     },
-    initCsrf: jest.fn().mockResolvedValue(undefined),
 }));
 
-import api, { initCsrf } from '@/lib/api';
+import api from '@/lib/api';
 
 const mockedApi = api as jest.Mocked<typeof api>;
-const mockedInitCsrf = initCsrf as jest.Mock;
 
+const mockToken = 'test-sanctum-token-xyz789';
 const mockUser = { id: 2, name: 'Grace Hopper', email: 'grace@example.com' };
 
 async function fillForm(
@@ -44,7 +47,7 @@ async function fillForm(
 
 beforeEach(() => {
     jest.clearAllMocks();
-    useAuthStore.setState({ user: null, isAuthenticated: false });
+    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
 });
 
 describe('RegisterPage — rendering', () => {
@@ -116,15 +119,16 @@ describe('RegisterPage — form validation', () => {
 });
 
 describe('RegisterPage — successful registration', () => {
-    it('calls initCsrf and POST /auth/register with the correct payload', async () => {
-        mockedApi.post.mockResolvedValueOnce({ data: { data: mockUser } });
+    it('calls POST /auth/register with the correct payload', async () => {
+        mockedApi.post.mockResolvedValueOnce({
+            data: { message: 'User registered successfully.', token: mockToken, user: mockUser },
+        });
         const user = userEvent.setup();
         renderWithProviders(<RegisterPage />);
         await fillForm(user);
         await user.click(screen.getByRole('button', { name: /criar conta/i }));
 
         await waitFor(() => {
-            expect(mockedInitCsrf).toHaveBeenCalledTimes(1);
             expect(mockedApi.post).toHaveBeenCalledWith('/auth/register', {
                 name: 'Grace Hopper',
                 email: 'grace@example.com',
@@ -134,14 +138,17 @@ describe('RegisterPage — successful registration', () => {
         });
     });
 
-    it('stores the user in the auth store after successful registration', async () => {
-        mockedApi.post.mockResolvedValueOnce({ data: { data: mockUser } });
+    it('stores the token and user in the auth store after successful registration', async () => {
+        mockedApi.post.mockResolvedValueOnce({
+            data: { message: 'User registered successfully.', token: mockToken, user: mockUser },
+        });
         const user = userEvent.setup();
         renderWithProviders(<RegisterPage />);
         await fillForm(user);
         await user.click(screen.getByRole('button', { name: /criar conta/i }));
 
         await waitFor(() => {
+            expect(useAuthStore.getState().token).toBe(mockToken);
             expect(useAuthStore.getState().user).toEqual(mockUser);
             expect(useAuthStore.getState().isAuthenticated).toBe(true);
         });
@@ -193,6 +200,7 @@ describe('RegisterPage — failed registration', () => {
         await user.click(screen.getByRole('button', { name: /criar conta/i }));
 
         await waitFor(() => {
+            expect(useAuthStore.getState().token).toBeNull();
             expect(useAuthStore.getState().isAuthenticated).toBe(false);
         });
     });
