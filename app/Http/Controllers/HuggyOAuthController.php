@@ -7,10 +7,13 @@ namespace App\Http\Controllers;
 use App\Enums\ProviderStatus;
 use App\Enums\ProviderType;
 use App\Models\ProviderConnection;
-use App\Providers\MessageProviders\HuggyProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirect;
 
 class HuggyOAuthController extends Controller
 {
@@ -24,13 +27,16 @@ class HuggyOAuthController extends Controller
             new OA\Response(response: 401, description: 'Unauthenticated'),
         ],
     )]
-    public function redirect(Request $request): JsonResponse
+    public function redirect(): JsonResponse
     {
-        $connection = $this->getOrCreateConnection($request);
-        $provider = new HuggyProvider($connection);
+        /** @var AbstractProvider $driver */
+        $driver = Socialite::driver('huggy');
+
+        /** @var SymfonyRedirect $redirectResponse */
+        $redirectResponse = $driver->stateless()->redirect();
 
         return response()->json([
-            'authorization_url' => $provider->getAuthorizationUrl(),
+            'authorization_url' => $redirectResponse->getTargetUrl(),
         ]);
     }
 
@@ -44,7 +50,7 @@ class HuggyOAuthController extends Controller
         ],
         responses: [
             new OA\Response(response: 200, description: 'Tokens stored, provider connected'),
-            new OA\Response(response: 400, description: 'Missing code or token exchange failed'),
+            new OA\Response(response: 400, description: 'Missing code or authentication failed'),
             new OA\Response(response: 401, description: 'Unauthenticated'),
         ],
     )]
@@ -56,18 +62,26 @@ class HuggyOAuthController extends Controller
             return response()->json(['message' => 'Authorization code is required.'], 400);
         }
 
-        $connection = $this->getOrCreateConnection($request);
-        $provider = new HuggyProvider($connection);
-        $tokens = $provider->exchangeCodeForTokens($code);
+        try {
+            /** @var AbstractProvider $driver */
+            $driver = Socialite::driver('huggy');
 
-        if (empty($tokens) || ! isset($tokens['access_token'])) {
+            /** @var SocialiteUser $socialiteUser */
+            $socialiteUser = $driver->stateless()->user();
+        } catch (\Exception $e) {
+            $connection = $this->getOrCreateConnection($request);
             $connection->update(['status' => ProviderStatus::ERROR->value]);
 
             return response()->json(['message' => 'Failed to exchange code for tokens.'], 400);
         }
 
+        $connection = $this->getOrCreateConnection($request);
         $connection->update([
-            'credentials' => json_encode($tokens),
+            'credentials' => json_encode([
+                'access_token' => $socialiteUser->token,
+                'refresh_token' => $socialiteUser->refreshToken,
+                'expires_in' => $socialiteUser->expiresIn,
+            ], JSON_THROW_ON_ERROR),
             'status' => ProviderStatus::ACTIVE->value,
             'connected_at' => now(),
         ]);

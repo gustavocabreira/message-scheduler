@@ -15,12 +15,4 @@ interface MessageProvider
     public function getContacts(array $filters = []): array;
 
     public function sendMessage(string $contactId, string $message): bool;
-
-    public function getAuthorizationUrl(): string;
-
-    /** @return array<string, mixed> */
-    public function exchangeCodeForTokens(string $code): array;
-
-    /** @return array<string, mixed> */
-    public function refreshTokens(string $refreshToken): array;
 }
