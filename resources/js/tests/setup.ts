@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
+// Mock Radix UI pointer capture APIs (not available in jsdom)
+window.PointerEvent = MouseEvent as unknown as typeof PointerEvent;
+Element.prototype.hasPointerCapture = jest.fn(() => false);
+Element.prototype.setPointerCapture = jest.fn();
+Element.prototype.releasePointerCapture = jest.fn();
+
 // react-router-dom v7 requires TextEncoder/TextDecoder (not present in older jsdom)
 Object.assign(global, { TextEncoder, TextDecoder });
 
