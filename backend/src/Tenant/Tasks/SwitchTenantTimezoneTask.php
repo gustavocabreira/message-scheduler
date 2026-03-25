@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Tenant\Tasks;
 
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
+use Src\Tenant\Models\Tenant;
 
-class SwitchTenantTimezoneTask implements SwitchTenantTask
+final class SwitchTenantTimezoneTask implements SwitchTenantTask
 {
     public function makeCurrent(IsTenant $tenant): void
     {
+        assert($tenant instanceof Tenant);
         config(['app.timezone' => $tenant->timezone]);
         date_default_timezone_set($tenant->timezone);
     }

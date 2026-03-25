@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,11 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'needsTenant' => \Spatie\Multitenancy\Http\Middleware\NeedsTenant::class,
+            'needsTenant' => Spatie\Multitenancy\Http\Middleware\NeedsTenant::class,
         ]);
 
         $middleware->appendToGroup('api', [
-            \Illuminate\Session\Middleware\StartSession::class,
+            Illuminate\Session\Middleware\StartSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

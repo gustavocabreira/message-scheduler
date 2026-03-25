@@ -1,16 +1,18 @@
 <?php
 
-use Spatie\Multitenancy\Jobs\TenantAware;
+declare(strict_types=1);
+
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Mail\SendQueuedMailable;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
 use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Queue\CallQueuedClosure;
 use Spatie\Multitenancy\Actions\ForgetCurrentTenantAction;
 use Spatie\Multitenancy\Actions\MakeQueueTenantAwareAction;
 use Spatie\Multitenancy\Actions\MakeTenantCurrentAction;
 use Spatie\Multitenancy\Actions\MigrateTenantAction;
+use Spatie\Multitenancy\Jobs\NotTenantAware;
+use Spatie\Multitenancy\Jobs\TenantAware;
 use Spatie\Multitenancy\Models\Tenant;
 
 return [
@@ -21,7 +23,7 @@ return [
      * This class should extend `Spatie\Multitenancy\TenantFinder\TenantFinder`
      *
      */
-    'tenant_finder' => \Src\Tenant\TenantFinder\UserTenantFinder::class,
+    'tenant_finder' => Src\Tenant\TenantFinder\UserTenantFinder::class,
 
     /*
      * These fields are used by tenant:artisan command to match one or more tenant.
@@ -36,8 +38,8 @@ return [
      * A valid task is any class that implements Spatie\Multitenancy\Tasks\SwitchTenantTask
      */
     'switch_tenant_tasks' => [
-        \Spatie\Multitenancy\Tasks\PrefixCacheTask::class,
-        \Src\Tenant\Tasks\SwitchTenantTimezoneTask::class,
+        Spatie\Multitenancy\Tasks\PrefixCacheTask::class,
+        Src\Tenant\Tasks\SwitchTenantTimezoneTask::class,
     ],
 
     /*
@@ -46,7 +48,7 @@ return [
      * It must  extend `Spatie\Multitenancy\Models\Tenant::class` or
      * implement `Spatie\Multitenancy\Contracts\IsTenant::class` interface
      */
-    'tenant_model' => \Src\Tenant\Models\Tenant::class,
+    'tenant_model' => Src\Tenant\Models\Tenant::class,
 
     /*
      * If there is a current tenant when dispatching a job, the id of the current tenant
@@ -122,7 +124,7 @@ return [
      * Jobs tenant aware even if these don't implement the TenantAware interface.
      */
     'tenant_aware_jobs' => [
-        \Src\Dispatch\Jobs\SendMessageJob::class,
+        Src\Dispatch\Jobs\SendMessageJob::class,
     ],
 
     /*

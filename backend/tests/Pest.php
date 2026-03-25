@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Src\Tenant\Models\Tenant;
 use Tests\TestCase;
 

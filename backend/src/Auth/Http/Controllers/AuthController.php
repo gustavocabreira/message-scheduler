@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -7,12 +9,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\HandleOAuthCallbackAction;
 use Src\Auth\Actions\SyncUserTenantsAction;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
-class AuthController extends Controller
+final class AuthController extends Controller
 {
-    public function redirect(): RedirectResponse
+    public function redirect(): SymfonyRedirectResponse
     {
         return Socialite::driver('huggy')->redirect();
     }
@@ -22,6 +26,7 @@ class AuthController extends Controller
         HandleOAuthCallbackAction $handleCallback,
         SyncUserTenantsAction $syncTenants,
     ): RedirectResponse {
+        /** @var SocialiteUser $socialiteUser */
         $socialiteUser = Socialite::driver('huggy')->user();
 
         $user = $handleCallback->handle($socialiteUser);

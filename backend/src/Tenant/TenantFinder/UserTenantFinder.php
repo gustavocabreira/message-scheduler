@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Tenant\TenantFinder;
 
 use Illuminate\Http\Request;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\TenantFinder\TenantFinder;
 
-class UserTenantFinder extends TenantFinder
+final class UserTenantFinder extends TenantFinder
 {
     public function findForRequest(Request $request): ?Tenant
     {
@@ -16,6 +18,6 @@ class UserTenantFinder extends TenantFinder
             return null;
         }
 
-        return Tenant::find($tenantId);
+        return Tenant::where('id', $tenantId)->first();
     }
 }

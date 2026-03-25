@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Tenant\Models;
 
 use Spatie\Multitenancy\Models\Tenant as BaseTenant;
 
-class Tenant extends BaseTenant
+final class Tenant extends BaseTenant
 {
     protected $fillable = [
         'name',
@@ -19,10 +21,10 @@ class Tenant extends BaseTenant
     protected function casts(): array
     {
         return [
-            'dispatch_window_start'  => 'integer',
-            'dispatch_window_end'    => 'integer',
-            'daily_dispatch_limit'   => 'integer',
-            'min_cadence_minutes'    => 'integer',
+            'dispatch_window_start' => 'integer',
+            'dispatch_window_end' => 'integer',
+            'daily_dispatch_limit' => 'integer',
+            'min_cadence_minutes' => 'integer',
             'duplicate_window_hours' => 'integer',
         ];
     }

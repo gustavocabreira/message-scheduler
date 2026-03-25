@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -12,9 +14,9 @@ function makeSocialiteUser(string $id = '42', string $name = 'João Silva', stri
         ->setRaw(['id' => $id, 'name' => $name, 'email' => $email])
         ->map(['id' => $id, 'name' => $name, 'email' => $email]);
 
-    $user->token        = 'access-token-abc';
+    $user->token = 'access-token-abc';
     $user->refreshToken = 'refresh-token-xyz';
-    $user->expiresIn    = 2592000;
+    $user->expiresIn = 2592000;
 
     return $user;
 }
@@ -60,7 +62,7 @@ describe('Huggy OAuth callback', function () {
         expect($user->huggy_access_token)->toBe('access-token-abc')
             ->and($user->huggy_refresh_token)->toBe('refresh-token-xyz');
 
-        $raw = \Illuminate\Support\Facades\DB::table('users')
+        $raw = Illuminate\Support\Facades\DB::table('users')
             ->where('id', $user->id)
             ->value('huggy_access_token');
 
@@ -75,13 +77,13 @@ describe('Huggy OAuth callback', function () {
 
     it('updates tokens when an existing user logs in again', function () {
         User::factory()->create([
-            'huggy_id'            => '42',
-            'huggy_access_token'  => 'old-token',
+            'huggy_id' => '42',
+            'huggy_access_token' => 'old-token',
             'huggy_refresh_token' => 'old-refresh',
         ]);
 
         $updated = makeSocialiteUser();
-        $updated->token        = 'new-token';
+        $updated->token = 'new-token';
         $updated->refreshToken = 'new-refresh';
 
         Socialite::shouldReceive('driver->user')->andReturn($updated);

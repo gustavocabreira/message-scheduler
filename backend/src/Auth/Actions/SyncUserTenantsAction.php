@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Auth\Actions;
 
 use App\Models\User;
@@ -8,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Src\Shared\Services\HuggyApiService;
 use Src\Tenant\Models\Tenant;
 
-class SyncUserTenantsAction
+final class SyncUserTenantsAction
 {
     public function __construct(private readonly HuggyApiService $huggyApi) {}
 
@@ -31,8 +33,8 @@ class SyncUserTenantsAction
 
         Tenant::upsert(
             array_map(fn (array $company): array => [
-                'id'       => $company['id'],
-                'name'     => $company['name'],
+                'id' => $company['id'],
+                'name' => $company['name'],
                 'timezone' => $company['timezone'] ?? 'UTC',
             ], $companies),
             uniqueBy: ['id'],
@@ -48,7 +50,7 @@ class SyncUserTenantsAction
         DB::connection('landlord')->table('tenant_user')->insert(
             array_map(fn (int $tenantId): array => [
                 'tenant_id' => $tenantId,
-                'user_id'   => $user->id,
+                'user_id' => $user->id,
             ], $tenantIds)
         );
 

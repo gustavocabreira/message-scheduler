@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
 use Src\Tenant\Models\Tenant;
 use Src\Tenant\TenantFinder\UserTenantFinder;

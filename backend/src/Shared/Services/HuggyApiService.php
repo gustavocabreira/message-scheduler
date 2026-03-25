@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Shared\Services;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Src\Shared\Exceptions\HuggyApiException;
 
-class HuggyApiService
+final class HuggyApiService
 {
     private string $version = 'v3';
 
@@ -16,7 +18,7 @@ class HuggyApiService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(
+        $this->baseUrl = mb_rtrim(
             (string) config('services.huggy.api_base_url', 'https://api.huggy.dev'),
             '/'
         );

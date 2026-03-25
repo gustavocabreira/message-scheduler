@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Src\Tenant\Tasks\SwitchTenantTimezoneTask;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Src\Auth\Actions\SyncUserTenantsAction;
@@ -19,7 +21,7 @@ function makeCompanies(): array
 /**
  * Mocks HuggyApiService to respond to the builder chain and return the given companies.
  *
- * @param array<int, array<string, mixed>> $companies
+ * @param  array<int, array<string, mixed>>  $companies
  */
 function mockHuggyApiReturning(array $companies, string $expectedToken = 'token-abc'): void
 {

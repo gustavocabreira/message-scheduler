@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Shared\Exceptions;
 
 use RuntimeException;
 
-class HuggyApiException extends RuntimeException {}
+final class HuggyApiException extends RuntimeException {}

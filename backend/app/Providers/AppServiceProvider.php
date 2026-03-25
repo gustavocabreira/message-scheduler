@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
 use Src\Auth\Socialite\HuggySocialiteProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -25,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
             $config = config('services.huggy');
 
             return new HuggySocialiteProvider(
-                request: $this->app['request'],
+                request: $this->app->make('request'),
                 clientId: $config['client_id'],
                 clientSecret: $config['client_secret'],
                 redirectUrl: $config['redirect'],
