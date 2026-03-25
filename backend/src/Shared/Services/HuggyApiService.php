@@ -7,8 +7,9 @@ namespace Src\Shared\Services;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Src\Shared\Exceptions\HuggyApiException;
+use Src\Shared\Services\Contracts\HuggyApiServiceInterface;
 
-final class HuggyApiService
+final class HuggyApiService implements HuggyApiServiceInterface
 {
     private string $version = 'v3';
 

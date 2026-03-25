@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 use Src\Auth\Actions\HandleOAuthCallbackAction;
-use Src\Auth\Actions\SyncUserTenantsAction;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 final class AuthController extends Controller
@@ -24,7 +24,7 @@ final class AuthController extends Controller
     public function callback(
         Request $request,
         HandleOAuthCallbackAction $handleCallback,
-        SyncUserTenantsAction $syncTenants,
+        SyncUserTenantsActionInterface $syncTenants,
     ): RedirectResponse {
         /** @var SocialiteUser $socialiteUser */
         $socialiteUser = Socialite::driver('huggy')->user();

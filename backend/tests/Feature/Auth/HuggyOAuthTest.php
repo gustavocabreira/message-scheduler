@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
-use Src\Auth\Actions\SyncUserTenantsAction;
+use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 use Src\Tenant\Models\Tenant;
 
 function makeSocialiteUser(string $id = '42', string $name = 'João Silva', string $email = 'joao@empresa.com'): SocialiteUser
@@ -38,7 +38,7 @@ describe('Huggy OAuth callback', function () {
     beforeEach(function () {
         Socialite::shouldReceive('driver->user')->andReturn(makeSocialiteUser())->byDefault();
 
-        $this->mock(SyncUserTenantsAction::class)
+        $this->mock(SyncUserTenantsActionInterface::class)
             ->shouldReceive('handle')
             ->andReturn(collect());
     });
@@ -106,7 +106,7 @@ describe('Huggy OAuth callback', function () {
     it('sets active_tenant_id in session when sync returns tenants', function () {
         $tenant = Tenant::create(['name' => 'Acme', 'timezone' => 'UTC']);
 
-        $this->mock(SyncUserTenantsAction::class)
+        $this->mock(SyncUserTenantsActionInterface::class)
             ->shouldReceive('handle')
             ->andReturn(collect([$tenant]));
 

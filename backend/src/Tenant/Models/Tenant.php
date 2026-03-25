@@ -9,6 +9,7 @@ use Spatie\Multitenancy\Models\Tenant as BaseTenant;
 final class Tenant extends BaseTenant
 {
     protected $fillable = [
+        'id',
         'name',
         'timezone',
         'dispatch_window_start',

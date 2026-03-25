@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-use Spatie\Multitenancy\Contracts\IsTenant;
+use Src\Tenant\Models\Tenant;
 use Src\Tenant\Tasks\SwitchTenantTimezoneTask;
 
 describe('SwitchTenantTimezoneTask', function () {
 
     it('applies the tenant timezone on makeCurrent', function () {
-        $tenant = mock(IsTenant::class);
-        $tenant->timezone = 'America/Sao_Paulo';
+        $tenant = new Tenant(['timezone' => 'America/Sao_Paulo']);
 
         $task = new SwitchTenantTimezoneTask;
         $task->makeCurrent($tenant);
@@ -30,8 +29,7 @@ describe('SwitchTenantTimezoneTask', function () {
     });
 
     it('sets both config and PHP runtime timezone on makeCurrent', function () {
-        $tenant = mock(IsTenant::class);
-        $tenant->timezone = 'Europe/London';
+        $tenant = new Tenant(['timezone' => 'Europe/London']);
 
         $task = new SwitchTenantTimezoneTask;
         $task->makeCurrent($tenant);

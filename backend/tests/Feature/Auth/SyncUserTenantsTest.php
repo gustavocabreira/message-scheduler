@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Src\Auth\Actions\SyncUserTenantsAction;
 use Src\Shared\Exceptions\HuggyApiException;
-use Src\Shared\Services\HuggyApiService;
+use Src\Shared\Services\Contracts\HuggyApiServiceInterface;
 use Src\Tenant\Models\Tenant;
 
 function makeCompanies(): array
@@ -25,7 +25,7 @@ function makeCompanies(): array
  */
 function mockHuggyApiReturning(array $companies, string $expectedToken = 'token-abc'): void
 {
-    test()->mock(HuggyApiService::class)
+    test()->mock(HuggyApiServiceInterface::class)
         ->shouldReceive('withToken')->with($expectedToken)->andReturnSelf()
         ->shouldReceive('v4')->andReturnSelf()
         ->shouldReceive('getUserCompanies')->andReturn($companies);
@@ -109,7 +109,7 @@ describe('SyncUserTenantsAction', function () {
     it('returns an empty collection when the API returns no companies', function () {
         $user = User::factory()->create(['huggy_access_token' => 'token-abc']);
 
-        test()->mock(HuggyApiService::class)
+        test()->mock(HuggyApiServiceInterface::class)
             ->shouldReceive('withToken')->andReturnSelf()
             ->shouldReceive('v4')->andReturnSelf()
             ->shouldReceive('getUserCompanies')->andReturn([]);
@@ -123,7 +123,7 @@ describe('SyncUserTenantsAction', function () {
     it('propagates HuggyApiException when the API call fails', function () {
         $user = User::factory()->create(['huggy_access_token' => 'token-abc']);
 
-        test()->mock(HuggyApiService::class)
+        test()->mock(HuggyApiServiceInterface::class)
             ->shouldReceive('withToken')->andReturnSelf()
             ->shouldReceive('v4')->andReturnSelf()
             ->shouldReceive('getUserCompanies')->andThrow(new HuggyApiException('HTTP 401'));

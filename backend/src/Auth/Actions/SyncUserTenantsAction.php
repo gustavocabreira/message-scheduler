@@ -7,12 +7,13 @@ namespace Src\Auth\Actions;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Src\Shared\Services\HuggyApiService;
+use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
+use Src\Shared\Services\Contracts\HuggyApiServiceInterface;
 use Src\Tenant\Models\Tenant;
 
-final class SyncUserTenantsAction
+final class SyncUserTenantsAction implements SyncUserTenantsActionInterface
 {
-    public function __construct(private readonly HuggyApiService $huggyApi) {}
+    public function __construct(private readonly HuggyApiServiceInterface $huggyApi) {}
 
     /**
      * Syncs the tenant list from Huggy with the local database and associates
