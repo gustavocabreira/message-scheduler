@@ -12,6 +12,10 @@ final class UserTenantFinder extends TenantFinder
 {
     public function findForRequest(Request $request): ?Tenant
     {
+        if (! $request->hasSession()) {
+            return null;
+        }
+
         $tenantId = $request->session()->get('active_tenant_id');
 
         if (! $tenantId) {
