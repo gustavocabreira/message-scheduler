@@ -41,8 +41,9 @@ abstract class TestCase extends BaseTestCase
     private function migrateLandlord(): void
     {
         $this->artisan('migrate', [
-            '--path'  => 'database/migrations/landlord',
-            '--force' => true,
+            '--database' => 'landlord',
+            '--path'     => 'database/migrations/landlord',
+            '--force'    => true,
         ]);
     }
 }
