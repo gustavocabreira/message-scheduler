@@ -204,6 +204,45 @@ Adicione as entradas abaixo no `/etc/hosts` da sua máquina:
 - **Análise estática**: PHPStan (nível 8)
 - **Estilo**: Laravel Pint
 - **Gerenciador de processos**: Supervisor (dentro do container backend)
+- **Documentação da API**: Scramble (dedoc/scramble)
+
+---
+
+## Documentação da API — Scramble
+
+Toda a documentação da API é gerada automaticamente pelo [Scramble](https://scramble.dedoc.co/). Nenhuma anotação manual é necessária — o Scramble infere os schemas a partir dos Form Requests, API Resources e tipos de retorno.
+
+### Endpoints
+
+| URL | Descrição |
+|-----|-----------|
+| `http://api.localhost.com/docs/api` | UI interativa (Stoplight Elements) |
+| `http://api.localhost.com/docs/api.json` | Especificação OpenAPI 3.1 (JSON) |
+
+### Acesso
+
+Em `local` e `staging` os endpoints de docs são abertos. Em `production`, o middleware `RestrictedDocsAccess` bloqueia o acesso por padrão — libere explicitamente por IP ou role conforme necessário.
+
+### Configuração relevante (`config/scramble.php`)
+
+```php
+'api_path'   => 'api',                         // prefixo das rotas documentadas
+'api_domain' => env('API_DOMAIN', 'api.localhost.com'),
+'middleware' => ['web', RestrictedDocsAccess::class],
+```
+
+Adicione `API_DOMAIN` ao `.env` de cada ambiente:
+
+```env
+API_DOMAIN=api.localhost.com   # local
+API_DOMAIN=api.seudominio.com  # produção
+```
+
+### Boas práticas
+
+- Nomeie as rotas de API (`->name('dispatches.index')`) — o Scramble usa o nome como `operationId`.
+- Documente respostas de erro com `@response` apenas quando o Scramble não conseguir inferi-las automaticamente.
+- Nunca escreva anotações OpenAPI manualmente se o Scramble já gera o schema corretamente.
 
 ---
 
