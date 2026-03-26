@@ -1,7 +1,11 @@
-#!/usr/bin/env sh
+#!/bin/bash
+
 set -e
 
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+cd /var/www/html
 
+echo "[entrypoint] Installing Composer dependencies..."
+composer install --no-interaction --optimize-autoloader
+
+echo "[entrypoint] Starting Supervisor..."
 exec "$@"

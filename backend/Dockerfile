@@ -15,17 +15,12 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-# Storage and cache directories writable by www-data (PHP-FPM user)
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
 # Supervisor config
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN mkdir -p /var/log/supervisor \
+    && chmod 777 /var/log/supervisor \
     && chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000

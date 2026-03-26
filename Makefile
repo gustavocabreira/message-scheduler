@@ -17,7 +17,7 @@ up:           ## Sobe todos os serviços em background
 	docker compose up -d
 
 down:         ## Para todos os serviços
-	docker compose down
+	docker compose down --remove-orphans
 
 restart:      ## Reinicia todos os serviços
 	docker compose restart
