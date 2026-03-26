@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Tenant\TenantFinder;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\TenantFinder\TenantFinder;
 
@@ -12,16 +13,28 @@ final class UserTenantFinder extends TenantFinder
 {
     public function findForRequest(Request $request): ?Tenant
     {
-        if (! $request->hasSession()) {
+        $workspaceId = $request->route('workspace');
+
+        if (! $workspaceId) {
             return null;
         }
 
-        $tenantId = $request->session()->get('active_tenant_id');
+        $user = $request->user();
 
-        if (! $tenantId) {
+        if (! $user) {
             return null;
         }
 
-        return Tenant::where('id', $tenantId)->first();
+        $hasAccess = DB::connection('landlord')
+            ->table('tenant_user')
+            ->where('tenant_id', $workspaceId)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (! $hasAccess) {
+            return null;
+        }
+
+        return Tenant::where('id', $workspaceId)->first();
     }
 }

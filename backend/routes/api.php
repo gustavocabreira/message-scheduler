@@ -3,7 +3,14 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Src\Auth\Http\Controllers\AuthController;
 
-Route::middleware(['auth', 'needsTenant'])->group(function () {
-    // domain routes registered here
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+    Route::prefix('v1/workspaces/{workspace}')
+        ->middleware('needsTenant')
+        ->group(function () {
+            // domain routes registered here
+        });
 });

@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
-use Src\Tenant\Models\Tenant;
 
 function makeSocialiteUser(string $id = '42', string $name = 'João Silva', string $email = 'joao@empresa.com'): SocialiteUser
 {
@@ -41,6 +41,8 @@ describe('Huggy OAuth callback', function () {
         $this->mock(SyncUserTenantsActionInterface::class)
             ->shouldReceive('handle')
             ->andReturn(collect());
+
+        config(['app.frontend_url' => 'http://app.localhost.com']);
     });
 
     it('creates a new user on first login', function () {
@@ -97,46 +99,38 @@ describe('Huggy OAuth callback', function () {
             ->and($user->huggy_refresh_token)->toBe('new-refresh');
     });
 
-    it('authenticates the user after callback', function () {
+    it('creates a Sanctum token after successful login', function () {
         $this->get(route('auth.huggy.callback'));
 
-        $this->assertAuthenticated();
+        expect(PersonalAccessToken::count())->toBe(1);
+        expect(PersonalAccessToken::first()->name)->toBe('huggy-oauth');
     });
 
-    it('sets active_tenant_id in session when sync returns tenants', function () {
-        $tenant = Tenant::create(['name' => 'Acme', 'timezone' => 'UTC']);
+    it('redirects to frontend with token after successful login', function () {
+        $response = $this->get(route('auth.huggy.callback'));
 
-        $this->mock(SyncUserTenantsActionInterface::class)
-            ->shouldReceive('handle')
-            ->andReturn(collect([$tenant]));
-
-        $this->get(route('auth.huggy.callback'))
-            ->assertSessionHas('active_tenant_id', $tenant->id);
-    });
-
-    it('does not set active_tenant_id in session when sync returns no tenants', function () {
-        $this->get(route('auth.huggy.callback'))
-            ->assertSessionMissing('active_tenant_id');
-    });
-
-    it('redirects to home after successful login', function () {
-        $this->get(route('auth.huggy.callback'))
-            ->assertRedirect('/');
+        $response->assertRedirectContains('app.localhost.com/auth/callback?token=');
     });
 
 });
 
 describe('Logout', function () {
 
-    it('logs the user out and invalidates the session', function () {
+    it('revokes the current access token', function () {
         $user = User::factory()->create();
+        $token = $user->createToken('huggy-oauth')->plainTextToken;
 
-        $this->actingAs($user)
-            ->withSession(['_token' => 'test-csrf'])
-            ->post(route('auth.logout'), ['_token' => 'test-csrf'])
-            ->assertRedirect('/');
+        $this->withToken($token)
+            ->postJson(route('auth.logout'))
+            ->assertOk()
+            ->assertJson(['message' => 'Logged out successfully']);
 
-        $this->assertGuest();
+        expect(PersonalAccessToken::count())->toBe(0);
+    });
+
+    it('returns 401 when called without a token', function () {
+        $this->postJson(route('auth.logout'))
+            ->assertUnauthorized();
     });
 
 });

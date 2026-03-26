@@ -59,6 +59,9 @@ horizon-status: ## Exibe o status atual do Horizon
 tinker:         ## Abre o Laravel Tinker
 	docker compose exec backend php artisan tinker
 
+bash:
+	docker compose exec backend bash
+
 # ── Testes ──────────────────────────────────────────────────────────────────
 test:         ## Roda todos os testes
 	docker compose exec backend php artisan test

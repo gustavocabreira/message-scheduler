@@ -12,6 +12,7 @@
         "php": "^8.3",
         "dedoc/scramble": "^0.13.16",
         "laravel/framework": "^13.0",
+        "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.26",
         "laravel/tinker": "^3.0",
         "nunomaduro/essentials": "^1.2",

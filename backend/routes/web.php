@@ -12,5 +12,4 @@ Route::get('/', function () {
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::get('huggy', [AuthController::class, 'redirect'])->name('huggy.redirect');
     Route::get('huggy/callback', [AuthController::class, 'callback'])->name('huggy.callback');
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 });

@@ -28,15 +28,8 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Socialite::extend('huggy', function () {
-            $config = config('services.huggy');
-
-            return new HuggySocialiteProvider(
-                request: $this->app->make('request'),
-                clientId: $config['client_id'],
-                clientSecret: $config['client_secret'],
-                redirectUrl: $config['redirect'],
-            );
+        Socialite::extend('huggy', function ($app) {
+            return Socialite::buildProvider(HuggySocialiteProvider::class, $app['config']['services.huggy']);
         });
     }
 }
