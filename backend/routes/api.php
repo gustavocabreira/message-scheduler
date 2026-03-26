@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Src\Auth\Http\Controllers\AuthController;
 
@@ -10,7 +11,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('v1/workspaces/{workspace}')
         ->middleware('needsTenant')
-        ->group(function () {
-            // domain routes registered here
-        });
+        ->group(function () {});
+
+    Route::get('me', function(Request $request) {
+        return $request->user();
+    });
 });

@@ -1,12 +1,21 @@
+import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { useUserStore } from './stores/userStore'
 
-const app = createApp(App)
+const pinia = createPinia()
+const app = createApp(App).use(pinia);
 
-app.use(createPinia())
-app.use(router)
+async function init() {
+    const userStore = useUserStore();
+    const res = await userStore.fetchUser();
 
-app.mount('#app')
+    app.use(router);
+
+    app.mount("#app");
+}
+
+init();
