@@ -35,6 +35,6 @@ final class UserTenantFinder extends TenantFinder
             return null;
         }
 
-        return Tenant::where('id', $workspaceId)->first();
+        return Tenant::query()->where('id', $workspaceId)->first();
     }
 }

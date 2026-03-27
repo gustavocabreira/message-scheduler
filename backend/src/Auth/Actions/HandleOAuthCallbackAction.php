@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Src\Auth\Actions;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
 final class HandleOAuthCallbackAction
@@ -26,7 +25,7 @@ final class HandleOAuthCallbackAction
             ? $this->downloadAvatar->handle($avatarUrl, (string) $socialiteUser->getName())
             : null;
 
-        $user = User::updateOrCreate(
+        return User::query()->updateOrCreate(
             ['huggy_id' => $huggyId],
             [
                 'name' => $socialiteUser->getName(),
@@ -39,9 +38,5 @@ final class HandleOAuthCallbackAction
                 'avatar_path' => $avatarPath,
             ]
         );
-
-        Auth::login($user, remember: true);
-
-        return $user;
     }
 }

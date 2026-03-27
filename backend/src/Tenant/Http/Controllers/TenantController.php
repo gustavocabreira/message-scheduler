@@ -9,45 +9,37 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
+use Src\Tenant\Actions\ActivateTenantAction;
+use Src\Tenant\Actions\GetActiveTenantAction;
+use Src\Tenant\Actions\ListTenantsAction;
 use Src\Tenant\Http\Requests\ListTenantsRequest;
 use Src\Tenant\Http\Resources\TenantResource;
 use Src\Tenant\Models\Tenant;
 
 final class TenantController extends Controller
 {
-    public function index(ListTenantsRequest $request): AnonymousResourceCollection
+    public function index(ListTenantsRequest $request, ListTenantsAction $action): AnonymousResourceCollection
     {
         /** @var User $user */
         $user = $request->user();
 
-        $tenants = Tenant::query()
-            ->join('tenant_user', 'tenants.id', '=', 'tenant_user.tenant_id')
-            ->where('tenant_user.user_id', $user->id)
-            ->when(
-                $request->string('name')->isNotEmpty(),
-                fn ($q) => $q->whereRaw('LOWER(tenants.name) LIKE ?', ['%'.mb_strtolower((string) $request->string('name')).'%'])
-            )
-            ->orderBy('tenants.name')
-            ->select('tenants.*')
-            ->paginate(10);
+        $nameFilter = $request->string('name')->isNotEmpty() ? (string) $request->string('name') : null;
 
-        return TenantResource::collection($tenants);
+        return TenantResource::collection($action->handle($user, $nameFilter));
     }
 
-    public function active(Request $request): TenantResource|JsonResponse
+    public function active(Request $request, GetActiveTenantAction $action): TenantResource|JsonResponse
     {
-        $tenantId = $request->session()->get('active_tenant_id')
-            ?? $request->user()->refresh()->last_workspace_id;
+        /** @var User $user */
+        $user = $request->user();
 
-        if (! $tenantId) {
-            return response()->json(['message' => 'No active workspace.'], 404);
-        }
+        $sessionTenantId = $request->session()->get('active_tenant_id');
+        $tenant = $action->handle($user, $sessionTenantId);
 
-        $tenant = Tenant::find($tenantId);
-
-        if (! $tenant) {
-            $request->session()->forget('active_tenant_id');
+        if (! $tenant instanceof Tenant) {
+            if ($sessionTenantId) {
+                $request->session()->forget('active_tenant_id');
+            }
 
             return response()->json(['message' => 'No active workspace.'], 404);
         }
@@ -58,26 +50,18 @@ final class TenantController extends Controller
         return new TenantResource($tenant);
     }
 
-    public function activate(Request $request, int $workspace): TenantResource|JsonResponse
+    public function activate(Request $request, ActivateTenantAction $action, int $workspace): TenantResource|JsonResponse
     {
-        $hasAccess = DB::connection('landlord')
-            ->table('tenant_user')
-            ->where('tenant_id', $workspace)
-            ->where('user_id', $request->user()->id)
-            ->exists();
+        /** @var User $user */
+        $user = $request->user();
 
-        if (! $hasAccess) {
-            return response()->json(['message' => 'Workspace not found.'], 404);
-        }
+        $tenant = $action->handle($user, $workspace);
 
-        $tenant = Tenant::find($workspace);
-
-        if (! $tenant) {
+        if (! $tenant instanceof Tenant) {
             return response()->json(['message' => 'Workspace not found.'], 404);
         }
 
         $request->session()->put('active_tenant_id', $tenant->id);
-        $request->user()->update(['last_workspace_id' => $tenant->id]);
 
         return new TenantResource($tenant);
     }

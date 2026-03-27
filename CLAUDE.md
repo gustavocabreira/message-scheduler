@@ -600,6 +600,22 @@ public function authorize(): bool
 
 Toda resposta de model passa por um Resource. Nunca retorne Eloquent diretamente. Datas em ISO 8601 no timezone do tenant.
 
+### Queries Eloquent
+
+Toda interação com o banco via Eloquent deve usar `Model::query()` explicitamente. Nunca use métodos estáticos diretos como `Model::find()`, `Model::where()`, `Model::create()`, etc.
+
+```php
+// correto
+Tenant::query()->find($id);
+User::query()->where('email', $email)->first();
+Dispatch::query()->create([...]);
+
+// errado
+Tenant::find($id);
+User::where('email', $email)->first();
+Dispatch::create([...]);
+```
+
 ### HuggyApiService
 
 Único ponto de comunicação com a API Huggy. Nunca faça chamadas HTTP em controllers, actions ou jobs diretamente. Erros são convertidos em exceções tipadas (`HuggyApiException`, `HuggyRateLimitException`, `HuggyUnavailableException`).

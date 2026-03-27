@@ -13,6 +13,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 use Src\Auth\Actions\HandleOAuthCallbackAction;
+use Src\Auth\Actions\LogoutAction;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 final class AuthController extends Controller
@@ -40,12 +41,9 @@ final class AuthController extends Controller
         return redirect("{$frontendUrl}/auth/callback");
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(LogoutAction $action, Request $request): JsonResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $action->handle($request);
 
         return response()->json(['message' => 'Logged out successfully']);
     }
