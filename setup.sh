@@ -17,6 +17,13 @@ else
   echo "==> backend/.env already exists (use --force to overwrite)"
 fi
 
+if [[ ! -f frontend/.env || "$FORCE" == "true" ]]; then
+  echo "==> Copying frontend/.env.example → frontend/.env"
+  cp frontend/.env.example frontend/.env
+else
+  echo "==> frontend/.env already exists (use --force to overwrite)"
+fi
+
 echo "==> Building images..."
 docker compose build
 
