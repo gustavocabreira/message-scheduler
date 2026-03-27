@@ -1,0 +1,13 @@
+{
+    "agents": [
+        "cursor",
+        "claude_code"
+    ],
+    "guidelines": true,
+    "skills": [
+        "laravel-best-practices",
+        "configuring-horizon",
+        "socialite-development",
+        "pest-testing"
+    ]
+}

@@ -22,16 +22,6 @@ final class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            related: Tenant::class,
-            table: 'tenant_user',
-            foreignPivotKey: 'user_id',
-            relatedPivotKey: 'tenant_id',
-        )->withoutTimestamps();
-    }
-
     /**
      * Get the attributes that should be cast.
      *
@@ -46,5 +36,19 @@ final class User extends Authenticatable
             'huggy_refresh_token' => 'encrypted',
             'huggy_token_expires_at' => 'datetime',
         ];
+    }
+
+    /** @return BelongsToMany<Tenant, $this, \Illuminate\Database\Eloquent\Relations\Pivot, string> */
+    public function tenants(): BelongsToMany
+    {
+        $relation = $this->belongsToMany(
+            related: Tenant::class,
+            table: 'tenant_user',
+            foreignPivotKey: 'user_id',
+            relatedPivotKey: 'tenant_id',
+        );
+
+        // @phpstan-ignore-next-line method.notFound
+        return $relation->withoutTimestamps();
     }
 }

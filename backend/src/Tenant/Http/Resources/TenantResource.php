@@ -11,10 +11,11 @@ use Src\Tenant\Models\Tenant;
 /** @mixin Tenant */
 final class TenantResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
-            'id'   => $this->id,
+            'id' => $this->id,
             'name' => $this->name,
         ];
     }

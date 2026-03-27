@@ -11,7 +11,7 @@ describe('GET /v1/workspaces', function () {
     it('returns tenants sorted alphabetically', function () {
         $user = User::factory()->create();
 
-        $beta  = Tenant::create(['name' => 'Beta Corp',  'timezone' => 'UTC']);
+        $beta = Tenant::create(['name' => 'Beta Corp',  'timezone' => 'UTC']);
         $alpha = Tenant::create(['name' => 'Alpha Corp', 'timezone' => 'UTC']);
         $gamma = Tenant::create(['name' => 'Gamma Corp', 'timezone' => 'UTC']);
 
@@ -99,7 +99,7 @@ describe('GET /v1/workspaces', function () {
     it('filters tenants by name (case-insensitive, partial match)', function () {
         $user = User::factory()->create();
 
-        $acme  = Tenant::create(['name' => 'Acme Corp',   'timezone' => 'UTC']);
+        $acme = Tenant::create(['name' => 'Acme Corp',   'timezone' => 'UTC']);
         $huggy = Tenant::create(['name' => 'Huggy Inc',   'timezone' => 'UTC']);
         $acme2 = Tenant::create(['name' => 'Acme Brasil', 'timezone' => 'UTC']);
 

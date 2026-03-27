@@ -16,7 +16,7 @@ describe('POST /v1/workspaces/{workspace}/activate', function () {
 
         DB::connection('landlord')->table('tenant_user')->insert([
             'tenant_id' => $tenant->id,
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
         ]);
 
         $this->actingAs($user)
@@ -32,7 +32,7 @@ describe('POST /v1/workspaces/{workspace}/activate', function () {
 
         DB::connection('landlord')->table('tenant_user')->insert([
             'tenant_id' => $tenant->id,
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
         ]);
 
         $this->actingAs($user)
@@ -73,7 +73,7 @@ describe('GET /v1/workspace/active', function () {
 
         DB::connection('landlord')->table('tenant_user')->insert([
             'tenant_id' => $tenant->id,
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
         ]);
 
         $this->actingAs($user)

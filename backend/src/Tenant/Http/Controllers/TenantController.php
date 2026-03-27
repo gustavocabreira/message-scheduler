@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Tenant\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -17,12 +18,15 @@ final class TenantController extends Controller
 {
     public function index(ListTenantsRequest $request): AnonymousResourceCollection
     {
+        /** @var User $user */
+        $user = $request->user();
+
         $tenants = Tenant::query()
             ->join('tenant_user', 'tenants.id', '=', 'tenant_user.tenant_id')
-            ->where('tenant_user.user_id', $request->user()->id)
+            ->where('tenant_user.user_id', $user->id)
             ->when(
                 $request->string('name')->isNotEmpty(),
-                fn ($q) => $q->whereRaw('LOWER(tenants.name) LIKE ?', ['%'.strtolower((string) $request->string('name')).'%'])
+                fn ($q) => $q->whereRaw('LOWER(tenants.name) LIKE ?', ['%'.mb_strtolower((string) $request->string('name')).'%'])
             )
             ->orderBy('tenants.name')
             ->select('tenants.*')
@@ -34,7 +38,7 @@ final class TenantController extends Controller
     public function active(Request $request): TenantResource|JsonResponse
     {
         $tenantId = $request->session()->get('active_tenant_id')
-            ?? $request->user()->last_workspace_id;
+            ?? $request->user()->refresh()->last_workspace_id;
 
         if (! $tenantId) {
             return response()->json(['message' => 'No active workspace.'], 404);
