@@ -17,6 +17,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 use Src\Auth\Actions\HandleOAuthCallbackAction;
 use Src\Auth\Actions\LogoutAction;
+use Src\Auth\Actions\SetDefaultTenantAction;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 #[Group(name: 'Auth')]
@@ -30,13 +31,14 @@ final class AuthController extends Controller
     public function callback(
         HandleOAuthCallbackAction $handleCallback,
         SyncUserTenantsActionInterface $syncTenants,
+        SetDefaultTenantAction $setDefaultTenant,
     ): RedirectResponse {
         /** @var SocialiteUser $socialiteUser */
         $socialiteUser = Socialite::driver('huggy')->user();
 
         $user = $handleCallback->handle($socialiteUser);
-
-        $syncTenants->handle($user);
+        $tenants = $syncTenants->handle($user);
+        $setDefaultTenant->handle($user, $tenants);
 
         Auth::login($user);
 

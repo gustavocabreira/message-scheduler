@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
+use Src\Tenant\Models\Tenant;
 
 function makeSocialiteUser(string $id = '42', string $name = 'João Silva', string $email = 'joao@empresa.com', ?string $avatar = null): SocialiteUser
 {
@@ -122,6 +123,55 @@ describe('Huggy OAuth callback', function () {
         $this->get(route('auth.huggy.callback'));
 
         expect(User::first()->avatar_path)->toBeNull();
+    });
+
+});
+
+describe('Huggy OAuth callback - default tenant', function () {
+
+    beforeEach(function () {
+        Socialite::shouldReceive('driver->user')->andReturn(makeSocialiteUser())->byDefault();
+        config(['app.frontend_url' => 'http://app.localhost.com']);
+    });
+
+    it('sets the first tenant returned by the API as last_workspace_id on first login', function () {
+        $tenantC = Tenant::create(['name' => 'Company C', 'timezone' => 'UTC']);
+        $tenantA = Tenant::create(['name' => 'Company A', 'timezone' => 'UTC']);
+        $tenantB = Tenant::create(['name' => 'Company B', 'timezone' => 'UTC']);
+
+        $this->mock(SyncUserTenantsActionInterface::class)
+            ->shouldReceive('handle')
+            ->andReturn(collect([$tenantC, $tenantA, $tenantB]));
+
+        $this->get(route('auth.huggy.callback'));
+
+        expect(User::query()->first()->last_workspace_id)->toBe($tenantC->id);
+    });
+
+    it('does not overwrite last_workspace_id on subsequent login', function () {
+        $tenantA = Tenant::create(['name' => 'Company A', 'timezone' => 'UTC']);
+        $tenantB = Tenant::create(['name' => 'Company B', 'timezone' => 'UTC']);
+
+        User::factory()->create(['huggy_id' => '42', 'last_workspace_id' => $tenantB->id]);
+
+        $this->mock(SyncUserTenantsActionInterface::class)
+            ->shouldReceive('handle')
+            ->andReturn(collect([$tenantA, $tenantB]));
+
+        $this->get(route('auth.huggy.callback'));
+
+        expect(User::query()->first()->last_workspace_id)->toBe($tenantB->id);
+    });
+
+    it('does not fail and leaves last_workspace_id null when user has no tenants', function () {
+        $this->mock(SyncUserTenantsActionInterface::class)
+            ->shouldReceive('handle')
+            ->andReturn(collect());
+
+        $this->get(route('auth.huggy.callback'))
+            ->assertRedirectContains('app.localhost.com');
+
+        expect(User::query()->first()->last_workspace_id)->toBeNull();
     });
 
 });
