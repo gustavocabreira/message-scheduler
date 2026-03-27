@@ -5,8 +5,18 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Src\Tenant\Models\Tenant;
 use Src\Tenant\TenantFinder\UserTenantFinder;
+
+beforeEach(function () {
+    Http::fake([
+        'https://api.huggy.dev/v4/companies/*/roles/my' => Http::response([
+            'id' => 1,
+            'permissions' => [],
+        ], 200),
+    ]);
+});
 
 describe('POST /v1/workspaces/{workspace}/activate', function () {
 

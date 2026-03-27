@@ -6,10 +6,15 @@ namespace Src\Tenant\Actions;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Src\Auth\Actions\SyncTenantRoleAction;
 use Src\Tenant\Models\Tenant;
 
 final class ActivateTenantAction
 {
+    public function __construct(
+        private readonly SyncTenantRoleAction $syncTenantRole,
+    ) {}
+
     public function handle(User $user, int $workspaceId): ?Tenant
     {
         $hasAccess = DB::connection('landlord')
@@ -27,6 +32,8 @@ final class ActivateTenantAction
         if (! $tenant instanceof Tenant) {
             return null;
         }
+
+        $this->syncTenantRole->handle($user, $tenant);
 
         $user->update(['last_workspace_id' => $tenant->id]);
 

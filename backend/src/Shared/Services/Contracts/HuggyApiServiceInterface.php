@@ -22,4 +22,13 @@ interface HuggyApiServiceInterface
      * @throws HuggyApiException
      */
     public function getUserCompanies(): array;
+
+    /**
+     * Returns the authenticated user's role within a specific company.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws HuggyApiException
+     */
+    public function getMyRoleInCompany(int $companyId): array;
 }

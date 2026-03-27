@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Src\Tenant\Models\Tenant;
 
 describe('GET /me', function () {
 
@@ -17,11 +19,34 @@ describe('GET /me', function () {
         $this->actingAs($user)
             ->getJson(route('me'))
             ->assertOk()
-            ->assertJsonStructure(['data' => ['id', 'name', 'email', 'huggy_id', 'avatar_path', 'avatar_url', 'created_at']])
+            ->assertJsonStructure(['data' => ['id', 'name', 'email', 'huggy_id', 'role', 'avatar_path', 'avatar_url', 'created_at']])
             ->assertJsonPath('data.id', $user->id)
             ->assertJsonPath('data.name', 'João Silva')
             ->assertJsonPath('data.email', 'joao@empresa.com')
             ->assertJsonPath('data.huggy_id', '42');
+    });
+
+    it('returns the role for the active workspace', function () {
+        $user = User::factory()->create();
+        $tenant = Tenant::create(['name' => 'Acme', 'timezone' => 'UTC']);
+
+        DB::connection('landlord')->table('tenant_user')->insert([
+            'tenant_id' => $tenant->id,
+            'user_id' => $user->id,
+        ]);
+
+        DB::table('model_has_roles')->insert([
+            'role_id' => 2,
+            'model_type' => User::class,
+            'model_id' => $user->id,
+            'team_id' => $tenant->id,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['active_tenant_id' => $tenant->id])
+            ->getJson(route('me'))
+            ->assertOk()
+            ->assertJsonPath('data.role', 'admin');
     });
 
     it('returns 401 when unauthenticated', function () {

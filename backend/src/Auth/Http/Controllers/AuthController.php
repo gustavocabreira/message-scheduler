@@ -18,6 +18,7 @@ use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 use Src\Auth\Actions\HandleOAuthCallbackAction;
 use Src\Auth\Actions\LogoutAction;
 use Src\Auth\Actions\SetDefaultTenantAction;
+use Src\Auth\Actions\SyncAllTenantsRolesAction;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 #[Group(name: 'Auth')]
@@ -31,6 +32,7 @@ final class AuthController extends Controller
     public function callback(
         HandleOAuthCallbackAction $handleCallback,
         SyncUserTenantsActionInterface $syncTenants,
+        SyncAllTenantsRolesAction $syncAllRoles,
         SetDefaultTenantAction $setDefaultTenant,
     ): RedirectResponse {
         /** @var SocialiteUser $socialiteUser */
@@ -38,6 +40,7 @@ final class AuthController extends Controller
 
         $user = $handleCallback->handle($socialiteUser);
         $tenants = $syncTenants->handle($user);
+        $syncAllRoles->handle($user, $tenants);
         $setDefaultTenant->handle($user, $tenants);
 
         Auth::login($user);

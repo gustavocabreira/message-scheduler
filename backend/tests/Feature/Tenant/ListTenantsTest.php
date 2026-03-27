@@ -29,6 +29,41 @@ describe('GET /v1/workspaces', function () {
             ->assertJsonPath('data.2.name', 'Gamma Corp');
     });
 
+    it('returns each tenant with the user role in that tenant', function () {
+        $user = User::factory()->create();
+
+        $adminTenant = Tenant::create(['name' => 'Admin Corp', 'timezone' => 'UTC']);
+        $operatorTenant = Tenant::create(['name' => 'Operator Corp', 'timezone' => 'UTC']);
+
+        DB::connection('landlord')->table('tenant_user')->insert([
+            ['tenant_id' => $adminTenant->id, 'user_id' => $user->id],
+            ['tenant_id' => $operatorTenant->id, 'user_id' => $user->id],
+        ]);
+
+        DB::table('model_has_roles')->insert([
+            [
+                'role_id' => 2,
+                'model_type' => User::class,
+                'model_id' => $user->id,
+                'team_id' => $adminTenant->id,
+            ],
+            [
+                'role_id' => 1,
+                'model_type' => User::class,
+                'model_id' => $user->id,
+                'team_id' => $operatorTenant->id,
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->getJson(route('workspaces.index'))
+            ->assertOk()
+            ->assertJsonPath('data.0.name', 'Admin Corp')
+            ->assertJsonPath('data.0.role', 'admin')
+            ->assertJsonPath('data.1.name', 'Operator Corp')
+            ->assertJsonPath('data.1.role', 'operator');
+    });
+
     it('returns empty data when user has no tenants', function () {
         $user = User::factory()->create();
 
@@ -144,7 +179,7 @@ describe('GET /v1/workspaces', function () {
             ->assertUnauthorized();
     });
 
-    it('exposes only id and name fields', function () {
+    it('exposes id, name and role fields only', function () {
         $user = User::factory()->create();
         $tenant = Tenant::create(['name' => 'Acme', 'timezone' => 'America/Sao_Paulo']);
 
@@ -155,7 +190,7 @@ describe('GET /v1/workspaces', function () {
         $this->actingAs($user)
             ->getJson(route('workspaces.index'))
             ->assertOk()
-            ->assertJsonStructure(['data' => [['id', 'name']]])
+            ->assertJsonStructure(['data' => [['id', 'name', 'role']]])
             ->assertJsonMissingPath('data.0.timezone')
             ->assertJsonMissingPath('data.0.dispatch_window_start')
             ->assertJsonMissingPath('data.0.daily_dispatch_limit');

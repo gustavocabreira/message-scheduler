@@ -131,6 +131,12 @@ describe('Huggy OAuth callback - default tenant', function () {
 
     beforeEach(function () {
         Socialite::shouldReceive('driver->user')->andReturn(makeSocialiteUser())->byDefault();
+        Http::fake([
+            'https://api.huggy.dev/v4/companies/*/roles/my' => Http::response([
+                'id' => 1,
+                'permissions' => [],
+            ], 200),
+        ]);
         config(['app.frontend_url' => 'http://app.localhost.com']);
     });
 
@@ -145,7 +151,9 @@ describe('Huggy OAuth callback - default tenant', function () {
 
         $this->get(route('auth.huggy.callback'));
 
-        expect(User::query()->first()->last_workspace_id)->toBe($tenantC->id);
+        $user = User::query()->where('huggy_id', '42')->firstOrFail();
+
+        expect($user->last_workspace_id)->toBe($tenantC->id);
     });
 
     it('does not overwrite last_workspace_id on subsequent login', function () {
@@ -160,7 +168,9 @@ describe('Huggy OAuth callback - default tenant', function () {
 
         $this->get(route('auth.huggy.callback'));
 
-        expect(User::query()->first()->last_workspace_id)->toBe($tenantB->id);
+        $user = User::query()->where('huggy_id', '42')->firstOrFail();
+
+        expect($user->last_workspace_id)->toBe($tenantB->id);
     });
 
     it('does not fail and leaves last_workspace_id null when user has no tenants', function () {
@@ -171,7 +181,9 @@ describe('Huggy OAuth callback - default tenant', function () {
         $this->get(route('auth.huggy.callback'))
             ->assertRedirectContains('app.localhost.com');
 
-        expect(User::query()->first()->last_workspace_id)->toBeNull();
+        $user = User::query()->where('huggy_id', '42')->firstOrFail();
+
+        expect($user->last_workspace_id)->toBeNull();
     });
 
 });

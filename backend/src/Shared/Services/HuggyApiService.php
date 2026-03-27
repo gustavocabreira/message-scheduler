@@ -60,11 +60,33 @@ final class HuggyApiService implements HuggyApiServiceInterface
      */
     public function getUserCompanies(): array
     {
-        $response = $this->http()->get($this->url('companies/1/users/me/companies'));
+        $response = $this->http()->get($this->url('users/me/companies'));
 
         if ($response->failed()) {
             throw new HuggyApiException(
                 "Failed to fetch user companies: HTTP {$response->status()}"
+            );
+        }
+
+        return $response->json() ?? [];
+    }
+
+    // ── v3 endpoints ────────────────────────────────────────────────────────
+
+    /**
+     * Returns the authenticated user's role within a specific company.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws HuggyApiException
+     */
+    public function getMyRoleInCompany(int $companyId): array
+    {
+        $response = $this->http()->get($this->url("companies/{$companyId}/roles/my"));
+
+        if ($response->failed()) {
+            throw new HuggyApiException(
+                "Failed to fetch role for company {$companyId}: HTTP {$response->status()}"
             );
         }
 

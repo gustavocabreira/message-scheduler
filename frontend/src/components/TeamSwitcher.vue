@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Component } from "vue"
+import type { Workspace } from "@/types/workspace"
 
 import { ChevronsUpDown } from "lucide-vue-next"
 import { computed } from "vue"
@@ -21,12 +22,10 @@ import {
 import { useWorkspaceStore } from "@/stores/workspaceStore"
 
 const props = defineProps<{
-  teams: {
-    id: number
-    name: string
+  teams: (Workspace & {
     logo?: Component
     plan?: string
-  }[]
+  })[]
 }>()
 
 const { isMobile } = useSidebar()
@@ -67,7 +66,7 @@ function initials(name: string): string {
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-medium">{{ activeTeam.name }}</span>
-                <span v-if="activeTeam.plan" class="truncate text-xs text-muted-foreground">{{ activeTeam.plan }}</span>
+                <span v-if="activeTeam.role" class="truncate text-xs text-muted-foreground capitalize">{{ activeTeam.role }}</span>
               </div>
             </template>
             <ChevronsUpDown class="ml-auto" />
@@ -94,7 +93,7 @@ function initials(name: string): string {
             </div>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-medium">{{ team.name }}</span>
-              <span v-if="team.plan" class="truncate text-xs text-muted-foreground">{{ team.plan }}</span>
+              <span v-if="team.role" class="truncate text-xs text-muted-foreground capitalize">{{ team.role }}</span>
             </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
