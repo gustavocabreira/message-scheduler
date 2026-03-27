@@ -41,7 +41,7 @@ const navMain = computed(() => [
     title: "Settings",
     route: null,
     icon: Settings2,
-    isActive: ["Channels"].includes(route.name as string),
+    isActive: route.path.startsWith("/settings"),
     items: [
       {
         title: "Channels",

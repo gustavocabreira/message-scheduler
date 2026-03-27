@@ -11,6 +11,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     const activeWorkspace = ref<Workspace | null>(
         JSON.parse(localStorage.getItem(ACTIVE_WORKSPACE_KEY) ?? "null")
     );
+    const switching = ref(false);
     const userStore = useUserStore();
 
     function getWorkspaces() {
@@ -41,6 +42,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     }
 
     async function activateWorkspace(workspace: Workspace) {
+        switching.value = true;
         const res = await workspaceService.activateWorkspace(workspace.id);
 
         if (res.ok && res.data) {
@@ -60,12 +62,14 @@ export const useWorkspaceStore = defineStore("workspace", () => {
             }
         }
 
+        switching.value = false;
         return res;
     }
 
     return {
         workspaces,
         activeWorkspace,
+        switching,
         fetchWorkspaces,
         fetchActiveWorkspace,
         activateWorkspace,

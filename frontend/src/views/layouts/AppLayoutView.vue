@@ -79,12 +79,37 @@ onMounted(async () => {
           </Breadcrumb>
         </div>
       </header>
-      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div class="relative flex flex-1 flex-col gap-4 p-4 pt-0">
         <h1 class="scroll-m-20 text-2xl font-bold text-balance">
           {{ currentPage }}
         </h1>
         <router-view :key="workspaceStore.activeWorkspace?.id" />
+        <Transition name="fade">
+          <div
+            v-if="workspaceStore.switching"
+            class="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-background/60 rounded-lg"
+          >
+            <div class="flex flex-col items-center gap-3 text-muted-foreground">
+              <svg class="animate-spin size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span class="text-sm font-medium">Switching workspace…</span>
+            </div>
+          </div>
+        </Transition>
       </div>
     </SidebarInset>
   </SidebarProvider>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
