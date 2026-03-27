@@ -46,7 +46,7 @@ final class ChannelController extends Controller
         Request $request,
         GetActiveTenantAction $getTenantAction,
         ListChannelEntrypointsAction $action,
-        int $channel,
+        string $channel,
     ): AnonymousResourceCollection {
         /** @var User $user */
         $user = $request->user();
@@ -58,7 +58,7 @@ final class ChannelController extends Controller
         }
 
         /** @var Channel|null $channelModel */
-        $channelModel = Channel::query()->find($channel);
+        $channelModel = Channel::query()->where('slug', $channel)->first();
 
         if (! $channelModel instanceof Channel) {
             abort(404);

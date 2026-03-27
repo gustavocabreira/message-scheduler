@@ -36,7 +36,7 @@ onMounted(async () => {
       <RouterLink
         :to="{
           name: 'Entrypoints',
-          params: { channel: channel.id },
+          params: { channel: channel.slug },
         }"
       >
         <ItemContent>

@@ -8,9 +8,9 @@ const entrypoints = ref<Entrypoint[]>([]);
 const route = useRoute();
 
 async function getEntrypoints() {
-    const channelId = Number(route.params.channel);
+    const channelSlug = route.params.channel as string;
 
-    const res = await channelService.getChannelEntrypoints(channelId);
+    const res = await channelService.getChannelEntrypoints(channelSlug);
 
     if (res.ok && res.data) {
       entrypoints.value = res.data;

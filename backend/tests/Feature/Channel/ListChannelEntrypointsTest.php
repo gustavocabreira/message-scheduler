@@ -38,7 +38,7 @@ describe('GET /v1/channels/{channel}/entrypoints', function () {
 
         $this->actingAs($user)
             ->withSession(['active_tenant_id' => $tenant->id])
-            ->getJson(route('channels.entrypoints', ['channel' => $channel->id]))
+            ->getJson(route('channels.entrypoints', ['channel' => $channel->slug]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonStructure(['data' => [['id', 'name', 'type', 'uuid', 'provider', 'entrypoint']]])
@@ -67,7 +67,7 @@ describe('GET /v1/channels/{channel}/entrypoints', function () {
             ->shouldReceive('v4')->once()->andReturnSelf()
             ->shouldReceive('getChannelEntrypoints')->once()->andReturn($entrypoints);
 
-        $routeParams = ['channel' => $channel->id];
+        $routeParams = ['channel' => $channel->slug];
 
         $this->actingAs($user)->withSession(['active_tenant_id' => $tenant->id])->getJson(route('channels.entrypoints', $routeParams))->assertOk();
         $this->actingAs($user)->withSession(['active_tenant_id' => $tenant->id])->getJson(route('channels.entrypoints', $routeParams))->assertOk();
@@ -90,7 +90,7 @@ describe('GET /v1/channels/{channel}/entrypoints', function () {
 
         $this->actingAs($user)
             ->withSession(['active_tenant_id' => $tenant->id])
-            ->getJson(route('channels.entrypoints', ['channel' => $channel->id]))
+            ->getJson(route('channels.entrypoints', ['channel' => $channel->slug]))
             ->assertOk()
             ->assertJsonPath('data', []);
     });
@@ -106,7 +106,7 @@ describe('GET /v1/channels/{channel}/entrypoints', function () {
 
         $this->actingAs($user)
             ->withSession(['active_tenant_id' => $tenant->id])
-            ->getJson(route('channels.entrypoints', ['channel' => 99999]))
+            ->getJson(route('channels.entrypoints', ['channel' => 'non-existent-slug']))
             ->assertNotFound();
     });
 
@@ -115,14 +115,14 @@ describe('GET /v1/channels/{channel}/entrypoints', function () {
         $channel = Channel::query()->where('active', true)->firstOrFail();
 
         $this->actingAs($user)
-            ->getJson(route('channels.entrypoints', ['channel' => $channel->id]))
+            ->getJson(route('channels.entrypoints', ['channel' => $channel->slug]))
             ->assertNotFound();
     });
 
     it('returns 401 when unauthenticated', function () {
         $channel = Channel::query()->where('active', true)->firstOrFail();
 
-        $this->getJson(route('channels.entrypoints', ['channel' => $channel->id]))
+        $this->getJson(route('channels.entrypoints', ['channel' => $channel->slug]))
             ->assertUnauthorized();
     });
 

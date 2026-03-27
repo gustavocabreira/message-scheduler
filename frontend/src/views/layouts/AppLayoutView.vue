@@ -67,10 +67,10 @@ function toggleMode() {
             <BreadcrumbList>
               <template v-for="crumb in breadcrumbs" :key="crumb.path">
                 <BreadcrumbItem :class="!crumb.isLast ? 'hidden md:block' : ''">
-                  <BreadcrumbLink v-if="!crumb.isLast">
-                    {{ crumb.label }}
+                  <BreadcrumbLink v-if="!crumb.isLast" class="capitalize">
+                    {{ crumb.label.split("-").join(" ") }}
                   </BreadcrumbLink>
-                  <BreadcrumbPage v-else>{{ crumb.label }}</BreadcrumbPage>
+                  <BreadcrumbPage v-else>{{ crumb.label.split("-").join(" ") }}</BreadcrumbPage>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator v-if="!crumb.isLast" class="hidden md:block" />
               </template>
