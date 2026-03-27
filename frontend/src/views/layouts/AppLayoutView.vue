@@ -27,7 +27,10 @@ import { onMounted } from "vue"
 const workspaceStore = useWorkspaceStore();
 
 onMounted(async () => {
-  await workspaceStore.fetchWorkspaces();
+  await Promise.all([
+    workspaceStore.fetchWorkspaces(),
+    workspaceStore.fetchActiveWorkspace(),
+  ]);
 });
 </script>
 

@@ -2,7 +2,7 @@
 import type { Component } from "vue"
 
 import { ChevronsUpDown } from "lucide-vue-next"
-import { ref, computed } from "vue"
+import { computed } from "vue"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +18,11 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
+import { useWorkspaceStore } from "@/stores/workspaceStore"
+
 const props = defineProps<{
   teams: {
+    id: number
     name: string
     logo?: Component
     plan?: string
@@ -27,8 +30,17 @@ const props = defineProps<{
 }>()
 
 const { isMobile } = useSidebar()
-const selectedTeam = ref<typeof props.teams[0] | null>(null)
-const activeTeam = computed(() => selectedTeam.value ?? props.teams[0] ?? null)
+const workspaceStore = useWorkspaceStore()
+
+const activeTeam = computed(() => {
+  const active = workspaceStore.activeWorkspace
+  if (active) return props.teams.find((t) => t.id === active.id) ?? props.teams[0] ?? null
+  return props.teams[0] ?? null
+})
+
+async function selectTeam(team: typeof props.teams[0]) {
+  await workspaceStore.activateWorkspace(team)
+}
 
 function initials(name: string): string {
   return name
@@ -71,10 +83,10 @@ function initials(name: string): string {
             Workspaces
           </DropdownMenuLabel>
           <DropdownMenuItem
-            v-for="(team, index) in teams"
-            :key="team.name"
+            v-for="team in teams"
+            :key="team.id"
             class="gap-2 p-2"
-            @click="selectedTeam = team"
+            @click="selectTeam(team)"
           >
             <div class="flex size-6 items-center justify-center rounded-sm border bg-sidebar-primary text-sidebar-primary-foreground text-xs font-semibold shrink-0">
               <component v-if="team.logo" :is="team.logo" class="size-3.5 shrink-0" />

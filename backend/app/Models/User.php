@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Src\Tenant\Models\Tenant;
 
-#[Fillable(['name', 'email', 'password', 'huggy_id', 'huggy_access_token', 'huggy_refresh_token', 'huggy_token_expires_at', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'huggy_id', 'huggy_access_token', 'huggy_refresh_token', 'huggy_token_expires_at', 'avatar_path', 'last_workspace_id'])]
 #[Hidden(['password', 'remember_token', 'huggy_access_token', 'huggy_refresh_token'])]
 final class User extends Authenticatable
 {

@@ -12,6 +12,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', MeController::class)->name('me');
 
     Route::get('v1/workspaces', [TenantController::class, 'index'])->name('workspaces.index');
+    Route::get('v1/workspace/active', [TenantController::class, 'active'])->name('workspace.active');
+    Route::post('v1/workspaces/{workspace}/activate', [TenantController::class, 'activate'])->name('workspaces.activate');
 
     Route::prefix('v1/workspaces/{workspace}')
         ->middleware('needsTenant')

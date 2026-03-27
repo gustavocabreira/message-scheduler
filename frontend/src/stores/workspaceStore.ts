@@ -5,6 +5,7 @@ import { ref } from "vue";
 
 export const useWorkspaceStore = defineStore("workspace", () => {
     const workspaces = ref<Workspace[]>([]);
+    const activeWorkspace = ref<Workspace | null>(null);
 
     function getWorkspaces() {
         return workspaces.value;
@@ -22,9 +23,30 @@ export const useWorkspaceStore = defineStore("workspace", () => {
         return res;
     }
 
+    async function fetchActiveWorkspace() {
+        const res = await workspaceService.getActiveWorkspace();
+
+        activeWorkspace.value = res.ok && res.data ? res.data : null;
+
+        return res;
+    }
+
+    async function activateWorkspace(workspace: Workspace) {
+        const res = await workspaceService.activateWorkspace(workspace.id);
+
+        if (res.ok && res.data) {
+            activeWorkspace.value = res.data;
+        }
+
+        return res;
+    }
+
     return {
         workspaces,
+        activeWorkspace,
         fetchWorkspaces,
+        fetchActiveWorkspace,
+        activateWorkspace,
         getWorkspaces,
     };
 })
