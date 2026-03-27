@@ -583,6 +583,8 @@ if ($hour < $tenant->dispatch_window_start || $hour >= $tenant->dispatch_window_
 
 Toda operação de negócio é uma **Action** com método único `handle()`. Recebe um DTO, nunca um `Request`. Retorna o modelo ou resultado. Pode disparar Events.
 
+Todo método de controller deve delegar sua lógica para uma Action dentro do respectivo domínio. Controllers não contêm lógica de negócio — apenas recebem a request, chamam a Action e retornam o Resource.
+
 ### Form Requests
 
 Um Request por operação. O `authorize()` delega para a Policy:
@@ -611,6 +613,14 @@ Resolução de wildcards ocorre **no job**, não na criação do disparo. Wildca
 ## Testes
 
 **Toda funcionalidade deve ter ao menos um teste de feature ou unitário** cobrindo o happy path e os principais edge cases. Não faça merge de código sem testes.
+
+### Como rodar os testes
+
+Sempre use `composer test` para rodar os testes do backend — nunca `php artisan test` diretamente. O script `composer test` executa em sequência: lint (Pint), análise estática (PHPStan nível 8) e a suíte completa de testes (Feature + Unit).
+
+```bash
+docker compose exec backend composer test
+```
 
 ### Estrutura
 
