@@ -6,8 +6,11 @@ for arg in "$@"; do
   [[ "$arg" == "--force" ]] && FORCE=true
 done
 
-export UID=$(id -u)
-export GID=$(id -g)
+# ── Root .env (UID/GID for Docker volume ownership) ──────────────────────────
+if [[ ! -f .env || "$FORCE" == "true" ]]; then
+  printf 'UID=%s\nGID=%s\n' "$(id -u)" "$(id -g)" > .env
+  echo "==> Generated .env with UID=$(id -u) GID=$(id -g)"
+fi
 
 # ── Backend .env ─────────────────────────────────────────────────────────────
 if [[ ! -f backend/.env || "$FORCE" == "true" ]]; then
