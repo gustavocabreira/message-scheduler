@@ -6,6 +6,9 @@ for arg in "$@"; do
   [[ "$arg" == "--force" ]] && FORCE=true
 done
 
+export UID=$(id -u)
+export GID=$(id -g)
+
 # ── Backend .env ─────────────────────────────────────────────────────────────
 if [[ ! -f backend/.env || "$FORCE" == "true" ]]; then
   echo "==> Copying backend/.env.example → backend/.env"
