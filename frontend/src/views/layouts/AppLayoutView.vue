@@ -21,6 +21,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useWorkspaceStore } from "@/stores/workspaceStore"
+import { onMounted } from "vue"
+
+const workspaceStore = useWorkspaceStore();
+
+onMounted(async () => {
+  await workspaceStore.fetchWorkspaces();
+});
 </script>
 
 <template>

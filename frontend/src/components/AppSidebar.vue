@@ -29,12 +29,15 @@ import {
 import { onMounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import type { User } from "@/types/user"
+import type { Workspace } from "@/types/workspace"
+import { useWorkspaceStore } from "@/stores/workspaceStore"
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: "icon",
 })
 
 const userStore = useUserStore()
+const workspaceStore = useWorkspaceStore()
 
 // This is sample data.
 const data = {
@@ -162,12 +165,13 @@ const data = {
 };
 
 const user = computed<User | null>(() => userStore.getUser())
+const workspaces = computed<Workspace[]>(() => workspaceStore.getWorkspaces())
 </script>
 
 <template>
   <Sidebar v-bind="props">
     <SidebarHeader>
-      <TeamSwitcher :teams="data.teams" />
+      <TeamSwitcher :teams="workspaces" />
     </SidebarHeader>
     <SidebarContent>
       <NavMain :items="data.navMain" />

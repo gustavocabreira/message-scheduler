@@ -9,9 +9,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Src\Tenant\Models\Tenant;
 
 #[Fillable(['name', 'email', 'password', 'huggy_id', 'huggy_access_token', 'huggy_refresh_token', 'huggy_token_expires_at', 'avatar_path'])]
 #[Hidden(['password', 'remember_token', 'huggy_access_token', 'huggy_refresh_token'])]
@@ -19,6 +21,16 @@ final class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: Tenant::class,
+            table: 'tenant_user',
+            foreignPivotKey: 'user_id',
+            relatedPivotKey: 'tenant_id',
+        )->withoutTimestamps();
+    }
 
     /**
      * Get the attributes that should be cast.
