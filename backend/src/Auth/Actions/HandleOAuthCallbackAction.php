@@ -10,10 +10,24 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 final class HandleOAuthCallbackAction
 {
+    public function __construct(
+        private readonly DownloadUserAvatarAction $downloadAvatar,
+    ) {}
+
     public function handle(SocialiteUser $socialiteUser): User
     {
+        $huggyId = (string) $socialiteUser->getId();
+
+        $raw = $socialiteUser->getRaw();
+        $photo = $raw['photo'] ?? null;
+        $avatarUrl = is_array($photo) ? ($photo['source'] ?? null) : (is_string($photo) ? $photo : null);
+
+        $avatarPath = $avatarUrl
+            ? $this->downloadAvatar->handle($avatarUrl, (string) $socialiteUser->getName())
+            : null;
+
         $user = User::updateOrCreate(
-            ['huggy_id' => (string) $socialiteUser->getId()],
+            ['huggy_id' => $huggyId],
             [
                 'name' => $socialiteUser->getName(),
                 'email' => $socialiteUser->getEmail(),
@@ -22,6 +36,7 @@ final class HandleOAuthCallbackAction
                 'huggy_token_expires_at' => $socialiteUser->expiresIn
                     ? now()->addSeconds((int) $socialiteUser->expiresIn)
                     : null,
+                'avatar_path' => $avatarPath,
             ]
         );
 

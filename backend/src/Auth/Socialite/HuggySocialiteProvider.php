@@ -48,7 +48,7 @@ final class HuggySocialiteProvider extends AbstractProvider
             'nickname' => $user['username'] ?? null,
             'name' => $user['name'] ?? null,
             'email' => $user['email'] ?? null,
-            'avatar' => $user['avatar'] ?? null,
+            'avatar' => $user['photo']['source'] ?? null,
         ]);
     }
 

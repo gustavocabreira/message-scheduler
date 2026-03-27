@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { userService } from "@/services/userService"
+import { getCsrfCookie } from "@/services/http";
 
 const props = defineProps<{
   class?: HTMLAttributes["class"]
@@ -28,7 +29,7 @@ function redirectToLogin() {
 }
 
 onMounted(async () => {
-  userService.getCsfrCookie();
+  getCsrfCookie();
 })
 </script>
 

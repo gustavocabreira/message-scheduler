@@ -32,7 +32,7 @@ export const http = {
 
       return {
         ok: true,
-        data,
+        data: data.data,
         errors: null,
         status,
       };
@@ -46,3 +46,11 @@ export const http = {
     }
   },
 };
+
+export const getCsrfCookie = async () => {
+  await axios.get(import.meta.env.VITE_API_URL + "/sanctum/csrf-cookie", {
+    withCredentials: true,
+    withXSRFToken: true,
+  });
+}
+

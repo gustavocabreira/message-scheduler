@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
@@ -32,18 +33,19 @@ final class AuthController extends Controller
 
         $syncTenants->handle($user);
 
-        $token = $user->createToken('huggy-oauth')->plainTextToken;
+        Auth::login($user);
 
         $frontendUrl = mb_rtrim((string) config('app.frontend_url'), '/');
 
-        return redirect("{$frontendUrl}/auth/callback?token={$token}");
+        return redirect("{$frontendUrl}/auth/callback");
     }
 
     public function logout(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
-        $user = $request->user();
-        $user->currentAccessToken()->delete();
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Logged out successfully']);
     }

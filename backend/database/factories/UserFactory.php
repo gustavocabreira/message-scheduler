@@ -36,6 +36,7 @@ final class UserFactory extends Factory
             'huggy_access_token' => null,
             'huggy_refresh_token' => null,
             'huggy_token_expires_at' => null,
+            'avatar_path' => null,
         ];
     }
 

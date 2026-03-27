@@ -3,16 +3,23 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
 
-function makeSocialiteUser(string $id = '42', string $name = 'João Silva', string $email = 'joao@empresa.com'): SocialiteUser
+function makeSocialiteUser(string $id = '42', string $name = 'João Silva', string $email = 'joao@empresa.com', ?string $avatar = null): SocialiteUser
 {
+    $raw = ['id' => $id, 'name' => $name, 'email' => $email];
+
+    if ($avatar !== null) {
+        $raw['photo'] = ['source' => $avatar];
+    }
+
     $user = (new SocialiteUser)
-        ->setRaw(['id' => $id, 'name' => $name, 'email' => $email])
-        ->map(['id' => $id, 'name' => $name, 'email' => $email]);
+        ->setRaw($raw)
+        ->map(['id' => $id, 'name' => $name, 'email' => $email, 'avatar' => $avatar]);
 
     $user->token = 'access-token-abc';
     $user->refreshToken = 'refresh-token-xyz';
@@ -99,38 +106,102 @@ describe('Huggy OAuth callback', function () {
             ->and($user->huggy_refresh_token)->toBe('new-refresh');
     });
 
-    it('creates a Sanctum token after successful login', function () {
+    it('logs the user in after successful login', function () {
         $this->get(route('auth.huggy.callback'));
 
-        expect(PersonalAccessToken::count())->toBe(1);
-        expect(PersonalAccessToken::first()->name)->toBe('huggy-oauth');
+        $this->assertAuthenticated();
     });
 
-    it('redirects to frontend with token after successful login', function () {
+    it('redirects to frontend after successful login', function () {
         $response = $this->get(route('auth.huggy.callback'));
 
-        $response->assertRedirectContains('app.localhost.com/auth/callback?token=');
+        $response->assertRedirectContains('app.localhost.com/auth/callback');
+    });
+
+    it('does not set avatar_path when user has no avatar', function () {
+        $this->get(route('auth.huggy.callback'));
+
+        expect(User::first()->avatar_path)->toBeNull();
     });
 
 });
 
-describe('Logout', function () {
+describe('Huggy OAuth callback - avatar', function () {
 
-    it('revokes the current access token', function () {
-        $user = User::factory()->create();
-        $token = $user->createToken('huggy-oauth')->plainTextToken;
+    beforeEach(function () {
+        $this->mock(SyncUserTenantsActionInterface::class)
+            ->shouldReceive('handle')
+            ->andReturn(collect());
 
-        $this->withToken($token)
-            ->postJson(route('auth.logout'))
-            ->assertOk()
-            ->assertJson(['message' => 'Logged out successfully']);
-
-        expect(PersonalAccessToken::count())->toBe(0);
+        config(['app.frontend_url' => 'http://app.localhost.com']);
     });
 
-    it('returns 401 when called without a token', function () {
-        $this->postJson(route('auth.logout'))
-            ->assertUnauthorized();
+    it('downloads and stores the user avatar on login', function () {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response('fake-image-content', 200)]);
+
+        Socialite::shouldReceive('driver->user')
+            ->andReturn(makeSocialiteUser(avatar: 'https://c.pzw.io/img/avatar-user-boy.jpg'));
+
+        $this->get(route('auth.huggy.callback'));
+
+        $user = User::first();
+        expect($user->avatar_path)->not->toBeNull();
+        Storage::disk('public')->assertExists($user->avatar_path);
+    });
+
+    it('stores avatar under avatars/{slugified-name}.{extension}', function () {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response('fake-image-content', 200)]);
+
+        Socialite::shouldReceive('driver->user')
+            ->andReturn(makeSocialiteUser(name: 'João Silva', avatar: 'https://c.pzw.io/img/avatar-user-boy.jpg'));
+
+        $this->get(route('auth.huggy.callback'));
+
+        expect(User::first()->avatar_path)->toBe('avatars/joao-silva.jpg');
+    });
+
+    it('file is publicly accessible via the public disk', function () {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response('fake-image-content', 200)]);
+
+        Socialite::shouldReceive('driver->user')
+            ->andReturn(makeSocialiteUser(avatar: 'https://c.pzw.io/img/avatar-user-boy.jpg'));
+
+        $this->get(route('auth.huggy.callback'));
+
+        $user = User::first();
+        Storage::disk('public')->assertExists($user->avatar_path);
+        expect(Storage::disk('public')->url($user->avatar_path))->toContain($user->avatar_path);
+    });
+
+    it('skips download when avatar file already exists', function () {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/joao-silva.jpg', 'existing-image-content');
+
+        Http::fake(['*' => Http::response('new-image-content', 200)]);
+
+        Socialite::shouldReceive('driver->user')
+            ->andReturn(makeSocialiteUser(avatar: 'https://c.pzw.io/img/avatar-user-boy.jpg'));
+
+        $this->get(route('auth.huggy.callback'));
+
+        Http::assertNothingSent();
+        expect(Storage::disk('public')->get('avatars/joao-silva.jpg'))->toBe('existing-image-content');
+    });
+
+    it('downloads avatar when file does not exist yet', function () {
+        Storage::fake('public');
+        Http::fake(['*' => Http::response('fresh-image-content', 200)]);
+
+        Socialite::shouldReceive('driver->user')
+            ->andReturn(makeSocialiteUser(avatar: 'https://c.pzw.io/img/avatar-user-boy.jpg'));
+
+        $this->get(route('auth.huggy.callback'));
+
+        Http::assertSentCount(1);
+        expect(Storage::disk('public')->get('avatars/joao-silva.jpg'))->toBe('fresh-image-content');
     });
 
 });
