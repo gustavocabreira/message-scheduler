@@ -22,9 +22,28 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useWorkspaceStore } from "@/stores/workspaceStore"
-import { onMounted } from "vue"
+import { computed, onMounted } from "vue"
+import { useRoute } from "vue-router"
 
 const workspaceStore = useWorkspaceStore();
+const route = useRoute();
+
+const breadcrumbs = computed(() => {
+  const segments = route.path.split('/').filter(Boolean)
+
+  if (segments.length === 0) {
+    return [{ label: String(route.name ?? 'Home'), path: '/', isLast: true }]
+  }
+
+  return segments.map((segment, index) => {
+    const path = '/' + segments.slice(0, index + 1).join('/')
+    const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+    const isLast = index === segments.length - 1
+    return { label, path, isLast }
+  })
+})
+
+const currentPage = computed(() => route.name as string)
 
 onMounted(async () => {
   await Promise.all([
@@ -47,11 +66,23 @@ onMounted(async () => {
           />
           <Breadcrumb>
             <BreadcrumbList>
+              <template v-for="crumb in breadcrumbs" :key="crumb.path">
+                <BreadcrumbItem :class="!crumb.isLast ? 'hidden md:block' : ''">
+                  <BreadcrumbLink v-if="!crumb.isLast">
+                    {{ crumb.label }}
+                  </BreadcrumbLink>
+                  <BreadcrumbPage v-else>{{ crumb.label }}</BreadcrumbPage>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator v-if="!crumb.isLast" class="hidden md:block" />
+              </template>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
       <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <h1 class="scroll-m-20 text-2xl font-bold text-balance">
+          {{ currentPage }}
+        </h1>
         <router-view/>
       </div>
     </SidebarInset>

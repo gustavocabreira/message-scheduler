@@ -3,6 +3,7 @@ import RedirectCallbackView from '@/views/auth/RedirectCallbackView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import AppLayoutView from '@/views/layouts/AppLayoutView.vue'
 import GuestLayoutView from '@/views/layouts/GuestLayoutView.vue'
+import ChannelsView from '@/views/settings/channels/ChannelsView.vue'
 
 const routes = [
     {
@@ -15,6 +16,17 @@ const routes = [
                 name: "Dashboard",
                 meta: { requiresAuth: true },
             },
+            {
+                path: "settings",
+                children: [
+                    {
+                        path: "channels",
+                        name: "Channels",
+                        component: ChannelsView,
+                        meta: { requiresAuth: true },
+                    }
+                ]
+            }
         ],
     },
     {
