@@ -19,26 +19,29 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
 import { Sun, Moon } from '@lucide/vue'
 
 const workspaceStore = useWorkspaceStore()
 const route = useRoute()
+const router = useRouter()
 const mode = useColorMode()
 
 const breadcrumbs = computed(() => {
   const segments = route.path.split('/').filter(Boolean)
 
   if (segments.length === 0) {
-    return [{ label: String(route.name ?? 'Home'), path: '/', isLast: true }]
+    return [{ label: String(route.name ?? 'Home'), path: '/', isLast: true, navigable: false }]
   }
 
   return segments.map((segment, index) => {
     const path = '/' + segments.slice(0, index + 1).join('/')
     const label = segment.charAt(0).toUpperCase() + segment.slice(1)
     const isLast = index === segments.length - 1
-    return { label, path, isLast }
+    const resolved = router.resolve(path)
+    const navigable = !isLast && !!resolved.name && resolved.name !== '404'
+    return { label, path, isLast, navigable }
   })
 })
 
@@ -67,10 +70,13 @@ function toggleMode() {
             <BreadcrumbList>
               <template v-for="crumb in breadcrumbs" :key="crumb.path">
                 <BreadcrumbItem :class="!crumb.isLast ? 'hidden md:block' : ''">
-                  <BreadcrumbLink v-if="!crumb.isLast" class="capitalize">
-                    {{ crumb.label.split("-").join(" ") }}
+                  <BreadcrumbLink v-if="!crumb.isLast" :as-child="crumb.navigable" class="capitalize">
+                    <router-link v-if="crumb.navigable" :to="crumb.path">
+                      {{ crumb.label.split('-').join(' ') }}
+                    </router-link>
+                    <template v-else>{{ crumb.label.split('-').join(' ') }}</template>
                   </BreadcrumbLink>
-                  <BreadcrumbPage v-else>{{ crumb.label.split("-").join(" ") }}</BreadcrumbPage>
+                  <BreadcrumbPage v-else>{{ crumb.label.split('-').join(' ') }}</BreadcrumbPage>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator v-if="!crumb.isLast" class="hidden md:block" />
               </template>
