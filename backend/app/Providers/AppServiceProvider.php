@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Dedoc\Scramble\Scramble;
+use Illuminate\Routing\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
 use Src\Auth\Actions\Contracts\SyncUserTenantsActionInterface;
@@ -30,6 +32,10 @@ final class AppServiceProvider extends ServiceProvider
     {
         Socialite::extend('huggy', function ($app) {
             return Socialite::buildProvider(HuggySocialiteProvider::class, $app['config']['services.huggy']);
+        });
+
+        Scramble::routes(function (Route $route) {
+            return str_starts_with($route->uri(), 'api/') || $route->uri() === 'api';
         });
     }
 }

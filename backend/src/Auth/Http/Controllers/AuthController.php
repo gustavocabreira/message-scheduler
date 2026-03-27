@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Src\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +19,7 @@ use Src\Auth\Actions\HandleOAuthCallbackAction;
 use Src\Auth\Actions\LogoutAction;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
+#[Group(name: 'Auth')]
 final class AuthController extends Controller
 {
     public function redirect(): SymfonyRedirectResponse
@@ -41,6 +45,12 @@ final class AuthController extends Controller
         return redirect("{$frontendUrl}/auth/callback");
     }
 
+    #[Endpoint(
+        operationId: 'auth.logout',
+        title: 'Logout',
+        description: 'Encerra a sessão autenticada do usuário, invalidando o cookie de sessão.',
+    )]
+    #[Response(status: 200, description: 'Sessão encerrada com sucesso.')]
     public function logout(LogoutAction $action, Request $request): JsonResponse
     {
         $action->handle($request);

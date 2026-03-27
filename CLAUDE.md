@@ -238,11 +238,39 @@ API_DOMAIN=api.localhost.com   # local
 API_DOMAIN=api.seudominio.com  # produção
 ```
 
+### Documentação dos endpoints
+
+Use **PHP attributes** do Scramble para documentar os controllers — nunca PHPDoc para esse fim. Os attributes disponíveis estão em `Dedoc\Scramble\Attributes\`:
+
+| Attribute | Alvo | Uso |
+|-----------|------|-----|
+| `#[Group(name: '')]` | classe ou método | Agrupa endpoints na sidebar da documentação |
+| `#[Endpoint(operationId: '', title: '', description: '')]` | método | Título e descrição do endpoint |
+| `#[Response(status: 404, description: '')]` | método | Documenta respostas que o Scramble não infere (erros, redirects) |
+
+```php
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\Response;
+
+#[Group(name: 'Workspaces')]
+final class TenantController extends Controller
+{
+    #[Endpoint(
+        operationId: 'workspaces.index',
+        title: 'List workspaces',
+        description: 'Retorna a lista paginada de workspaces do usuário.',
+    )]
+    #[Response(status: 404, description: 'Workspace não encontrado.')]
+    public function index(...): AnonymousResourceCollection { ... }
+}
+```
+
 ### Boas práticas
 
-- Nomeie as rotas de API (`->name('dispatches.index')`) — o Scramble usa o nome como `operationId`.
-- Documente respostas de erro com `@response` apenas quando o Scramble não conseguir inferi-las automaticamente.
-- Nunca escreva anotações OpenAPI manualmente se o Scramble já gera o schema corretamente.
+- Nomeie as rotas de API (`->name('dispatches.index')`) — use o mesmo nome como `operationId` no `#[Endpoint]`.
+- Use `#[Response]` apenas quando o Scramble não conseguir inferir a resposta automaticamente (ex: `JsonResponse` com erro).
+- Nunca escreva anotações OpenAPI manuais ou PHPDoc de documentação se o Scramble já gera o schema corretamente.
 
 ---
 
