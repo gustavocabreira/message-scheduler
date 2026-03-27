@@ -3,6 +3,7 @@ import type { Workspace } from "@/types/workspace";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useUserStore } from "@/stores/userStore";
+import { useUiStore } from "@/stores/uiStore";
 
 const ACTIVE_WORKSPACE_KEY = "active_workspace";
 
@@ -11,7 +12,6 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     const activeWorkspace = ref<Workspace | null>(
         JSON.parse(localStorage.getItem(ACTIVE_WORKSPACE_KEY) ?? "null")
     );
-    const switching = ref(false);
     const userStore = useUserStore();
 
     function getWorkspaces() {
@@ -42,34 +42,34 @@ export const useWorkspaceStore = defineStore("workspace", () => {
     }
 
     async function activateWorkspace(workspace: Workspace) {
-        switching.value = true;
-        const res = await workspaceService.activateWorkspace(workspace.id);
+        const uiStore = useUiStore();
+        return uiStore.withLoadingOverlay("Switching workspace…", async () => {
+            const res = await workspaceService.activateWorkspace(workspace.id);
 
-        if (res.ok && res.data) {
-            activeWorkspace.value = res.data;
-            localStorage.setItem(ACTIVE_WORKSPACE_KEY, JSON.stringify(res.data));
-            workspaces.value = workspaces.value.map((item) =>
-                item.id === res.data!.id ? { ...item, role: res.data!.role } : item
-            );
+            if (res.ok && res.data) {
+                activeWorkspace.value = res.data;
+                localStorage.setItem(ACTIVE_WORKSPACE_KEY, JSON.stringify(res.data));
+                workspaces.value = workspaces.value.map((item) =>
+                    item.id === res.data!.id ? { ...item, role: res.data!.role } : item
+                );
 
-            const currentUser = userStore.getUser();
+                const currentUser = userStore.getUser();
 
-            if (currentUser !== null) {
-                userStore.setUser({
-                    ...currentUser,
-                    role: res.data.role,
-                });
+                if (currentUser !== null) {
+                    userStore.setUser({
+                        ...currentUser,
+                        role: res.data.role,
+                    });
+                }
             }
-        }
 
-        switching.value = false;
-        return res;
+            return res;
+        });
     }
 
     return {
         workspaces,
         activeWorkspace,
-        switching,
         fetchWorkspaces,
         fetchActiveWorkspace,
         activateWorkspace,

@@ -6,16 +6,15 @@ namespace Src\Auth\Actions;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 final class DownloadUserAvatarAction
 {
-    public function handle(string $avatarUrl, string $name): string
+    public function handle(string $avatarUrl): string
     {
         $urlPath = (string) parse_url($avatarUrl, PHP_URL_PATH);
-        $extension = pathinfo($urlPath, PATHINFO_EXTENSION) ?: 'jpg';
+        $filename = pathinfo($urlPath, PATHINFO_BASENAME) ?: 'avatar.jpg';
 
-        $path = 'avatars/'.Str::slug($name).'.'.$extension;
+        $path = 'avatars/'.$filename;
 
         if (Storage::disk('public')->exists($path)) {
             return $path;

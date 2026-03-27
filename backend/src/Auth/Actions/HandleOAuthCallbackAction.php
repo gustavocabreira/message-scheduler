@@ -22,7 +22,7 @@ final class HandleOAuthCallbackAction
         $avatarUrl = is_array($photo) ? ($photo['source'] ?? null) : (is_string($photo) ? $photo : null);
 
         $avatarPath = $avatarUrl
-            ? $this->downloadAvatar->handle($avatarUrl, (string) $socialiteUser->getName())
+            ? $this->downloadAvatar->handle($avatarUrl)
             : null;
 
         return User::query()->updateOrCreate(
