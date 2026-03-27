@@ -83,7 +83,7 @@ onMounted(async () => {
         <h1 class="scroll-m-20 text-2xl font-bold text-balance">
           {{ currentPage }}
         </h1>
-        <router-view/>
+        <router-view :key="workspaceStore.activeWorkspace?.id" />
       </div>
     </SidebarInset>
   </SidebarProvider>

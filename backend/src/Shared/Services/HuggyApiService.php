@@ -71,6 +71,26 @@ final class HuggyApiService implements HuggyApiServiceInterface
         return $response->json() ?? [];
     }
 
+    /**
+     * Returns the entrypoints for a given channel within a company.
+     *
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws HuggyApiException
+     */
+    public function getChannelEntrypoints(int $companyId, string $channelSlug): array
+    {
+        $response = $this->http()->get($this->url("companies/{$companyId}/channels/{$channelSlug}"));
+
+        if ($response->failed()) {
+            throw new HuggyApiException(
+                "Failed to fetch entrypoints for channel {$channelSlug}: HTTP {$response->status()}"
+            );
+        }
+
+        return $response->json() ?? [];
+    }
+
     // ── v3 endpoints ────────────────────────────────────────────────────────
 
     /**

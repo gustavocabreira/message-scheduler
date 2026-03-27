@@ -4,9 +4,13 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useUserStore } from "@/stores/userStore";
 
+const ACTIVE_WORKSPACE_KEY = "active_workspace";
+
 export const useWorkspaceStore = defineStore("workspace", () => {
     const workspaces = ref<Workspace[]>([]);
-    const activeWorkspace = ref<Workspace | null>(null);
+    const activeWorkspace = ref<Workspace | null>(
+        JSON.parse(localStorage.getItem(ACTIVE_WORKSPACE_KEY) ?? "null")
+    );
     const userStore = useUserStore();
 
     function getWorkspaces() {
@@ -29,6 +33,9 @@ export const useWorkspaceStore = defineStore("workspace", () => {
         const res = await workspaceService.getActiveWorkspace();
 
         activeWorkspace.value = res.ok && res.data ? res.data : null;
+        if (activeWorkspace.value) {
+            localStorage.setItem(ACTIVE_WORKSPACE_KEY, JSON.stringify(activeWorkspace.value));
+        }
 
         return res;
     }
@@ -38,6 +45,7 @@ export const useWorkspaceStore = defineStore("workspace", () => {
 
         if (res.ok && res.data) {
             activeWorkspace.value = res.data;
+            localStorage.setItem(ACTIVE_WORKSPACE_KEY, JSON.stringify(res.data));
             workspaces.value = workspaces.value.map((item) =>
                 item.id === res.data!.id ? { ...item, role: res.data!.role } : item
             );

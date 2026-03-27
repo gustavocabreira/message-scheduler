@@ -3,3 +3,12 @@ export interface Channel {
     name: string;
     slug: string;
 }
+
+export interface Entrypoint {
+    id: number
+    name: string
+    type: string
+    uuid: string
+    provider: string
+    entrypoint: string
+}

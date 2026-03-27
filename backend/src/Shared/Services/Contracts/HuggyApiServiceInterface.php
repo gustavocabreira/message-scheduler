@@ -31,4 +31,13 @@ interface HuggyApiServiceInterface
      * @throws HuggyApiException
      */
     public function getMyRoleInCompany(int $companyId): array;
+
+    /**
+     * Returns the entrypoints for a given channel within a company.
+     *
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws HuggyApiException
+     */
+    public function getChannelEntrypoints(int $companyId, string $channelSlug): array;
 }

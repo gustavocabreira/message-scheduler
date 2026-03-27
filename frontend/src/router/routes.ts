@@ -4,6 +4,7 @@ import DashboardView from '@/views/DashboardView.vue'
 import AppLayoutView from '@/views/layouts/AppLayoutView.vue'
 import GuestLayoutView from '@/views/layouts/GuestLayoutView.vue'
 import ChannelsView from '@/views/settings/channels/ChannelsView.vue'
+import EntrypointsView from '@/views/settings/channels/EntrypointsView.vue'
 
 const routes = [
     {
@@ -24,9 +25,15 @@ const routes = [
                         name: "Channels",
                         component: ChannelsView,
                         meta: { requiresAuth: true },
-                    }
+                    },
+                    {
+                        path: "channels/:channel/entrypoints",
+                        name: "Entrypoints",
+                        component: EntrypointsView,
+                        meta: { requiresAuth: true },
+                    },
                 ]
-            }
+            },
         ],
     },
     {

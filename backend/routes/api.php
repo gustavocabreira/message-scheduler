@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', MeController::class)->name('me');
 
     Route::get('v1/channels', [ChannelController::class, 'index'])->name('channels.index');
+    Route::get('v1/channels/{channel}/entrypoints', [ChannelController::class, 'entrypoints'])->name('channels.entrypoints');
 
     Route::get('v1/workspaces', [TenantController::class, 'index'])->name('workspaces.index');
     Route::get('v1/workspace/active', [TenantController::class, 'active'])->name('workspace.active');
